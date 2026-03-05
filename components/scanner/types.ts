@@ -11,6 +11,7 @@ export interface ScanEntry {
   qty04?: number; // ✅ NEW
   selected?: boolean;
   error?: string;
+  locked?: boolean
 }
 
 declare global {

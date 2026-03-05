@@ -106,7 +106,7 @@ export default function ScannerClient() {
     onScanText: (text) => {
       if (beepRef.current) {
         beepRef.current.currentTime = 0;
-        beepRef.current.play().catch(() => {});
+        beepRef.current.play().catch(() => { });
       }
 
       showToast("Scanned: " + text, "success");
@@ -191,6 +191,49 @@ export default function ScannerClient() {
     // ✅ 2) After DB save succeeds → generate pdf
     await exportScanPdf({ layNo: lay, rows: selectedRows });
   }, [layNo, history, showToast]);
+
+
+
+  const loadLayNo = async (lay: string) => {
+    try {
+      const res = await fetch("/api/lay-lookup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ layNo: lay }),
+      });
+      const json = await res.json();
+
+      if (!res.ok || !json.success) return;
+
+      const rows = json.rows.map((r: any) => ({
+        id: Math.random(),
+        barcode: r.ROLL_BARCODE,
+        time: "Existing",
+        status: "found",
+        data: r,
+        qty02: Number(r.QTY_02) || 0,
+        qty04: Number(r.QTY_04) || 0,
+        selected: true,
+        locked: true, // 🔒 cannot remove
+      }));
+
+      setHistory(rows);
+    } catch {
+      showToast("Cannot load Lay No data", "error");
+    }
+  };
+
+  const handleLayNoChange = useCallback((val: string) => {
+    setLayNo(val);
+
+    // Only fetch when it looks valid
+    if (val.trim().length > 0) {
+      loadLayNo(val.trim());
+    }
+  }, [loadLayNo]);
+
   return (
     <>
       <Script
@@ -206,10 +249,12 @@ export default function ScannerClient() {
         <main className="mx-auto max-w-md px-4 py-5 flex flex-col gap-5">
           <LayNoCard
             layNo={layNo}
-            onChange={setLayNo}
-            onClear={() => setLayNo("")}
+            onChange={handleLayNoChange}   // 👈 use this instead of setLayNo
+            onClear={() => {
+              setLayNo("");
+              setHistory([]);              // optional: clear loaded rows
+            }}
           />
-
           <CameraCard
             zxingReady={zxingReady}
             scanning={scanning}

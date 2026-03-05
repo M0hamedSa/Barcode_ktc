@@ -49,9 +49,9 @@ export async function queryByBarcode(
 
   const columns = columnsEnv
     ? columnsEnv
-        .split(",")
-        .map((c) => `[${c.trim()}]`)
-        .join(", ")
+      .split(",")
+      .map((c) => `[${c.trim()}]`)
+      .join(", ")
     : "*";
 
   // ✅ Pull qty from env column, fallback to 1 if not set
@@ -113,4 +113,29 @@ export async function saveLayNoForRollBarcodes(
 
   const result = await req.query(q);
   return result.rowsAffected?.[0] ?? 0;
+}
+
+
+
+export async function getRollsByLayNo(layNo: string) {
+  const pool = await getPool();
+
+  const result = await pool
+    .request()
+    .input("layNo", sql.VarChar(50), layNo)
+    .query(`
+      SELECT
+        ROLL_BARCODE,
+        WO_NO,
+        JO_NO,
+        QTY_02,
+        QTY_04,
+        ACT_DATA_08,
+        ACT_DATA_09,
+        ACT_DATA_07
+      FROM act_trn_05
+      WHERE LAY_NO = @layNo
+    `);
+
+  return result.recordset;
 }

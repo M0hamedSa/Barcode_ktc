@@ -23,12 +23,6 @@ export function ResultCard({
   const hiddenKeys = useMemo(() => new Set(["QTY_02", "QTY_04"]), []);
 
   // If entry changes (new scan), keep it expanded or collapsed as you like
-  // Here: auto-expand when found for first time
-  useEffect(() => {
-    if (entry.status === "found") setExpanded(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entry.id]);
-
   // Recalc height when expanded or content changes
   useEffect(() => {
     const el = contentRef.current;
@@ -141,14 +135,18 @@ export function ResultCard({
 
           <button
             type="button"
+            disabled={entry.locked}
             onClick={() => onToggleSelected(entry.id)}
-            className={`rounded-xl px-3 py-2 text-[12px] font-semibold border transition ${
-              selected
-                ? "bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700"
-                : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
-            }`}
+            className={`rounded-xl px-3 py-2 text-[12px] font-semibold border transition
+            ${entry.locked
+                ? "bg-gray-200 text-gray-500 border-gray-200 cursor-not-allowed"
+                : selected
+                  ? "bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700"
+                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+              }
+  `}
           >
-            {selected ? "✓ Added" : "+ Add"}
+            {entry.locked ? "Existing" : selected ? "✓ Added" : "+ Add"}
           </button>
 
           <button
