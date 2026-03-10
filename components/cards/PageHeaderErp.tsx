@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Badge } from "../ui/Badge";
+import Link from "next/link";
 
 export function PageHeaderErp({
   scanning,
@@ -11,9 +12,9 @@ export function PageHeaderErp({
   return (
     <header className="sticky top-0 z-10 border-b border-gray-500 bg-white/80 backdrop-blur">
       <div className="mx-auto max-w-md px-4 py-3 flex items-center gap-3">
-        <div className="h-10 w-10 rounded-2xl border border-gray-500 bg-slate-50 grid place-items-center overflow-hidden">
-          <Image src="/logo.png" alt="Logo" width={40} height={40} />
-        </div>
+          <Link href="/">
+            <Image src="/logo.png" alt="Logo" width={40} height={40} />
+          </Link>
 
         <div className="min-w-0">
           <h1 className="text-[14px] font-extrabold tracking-tight text-slate-900">
