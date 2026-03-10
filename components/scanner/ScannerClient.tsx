@@ -16,6 +16,7 @@ import { CameraCard } from "../cards/CameraCard";
 import { PdfCartCard } from "../cards/PdfCartCard";
 import { ManualEntryCard } from "../cards/ManualEntryCard";
 import { ResultsSection } from "../results/ResultsSection";
+import Script from "next/script";
 
 export default function ScannerClient() {
   const [zxingReady, setZxingReady] = useState(false);
@@ -228,6 +229,14 @@ export default function ScannerClient() {
     [loadLayNo],
   );
 
+  useEffect(() => {
+    if (window.__zxingReady) {
+      setTimeout(() => setZxingReady(true), 0); // avoid sync setState warning
+    } else if (window.__zxingError) {
+      showToast("Failed to load scanner library", "error");
+    }
+  }, [showToast]);
+
   // const exportErpPdf = async () => {
   //   const barcodes = history.map((r) => r.barcode);
 
@@ -250,8 +259,6 @@ export default function ScannerClient() {
   return (
     <>
       {/* <Script
-        src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"
-        strategy="afterInteractive"
         onLoad={() => setZxingReady(true)}
         onError={() => showToast("Failed to load scanner library", "error")}
       /> */}

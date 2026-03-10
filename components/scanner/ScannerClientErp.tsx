@@ -122,33 +122,20 @@ export default function ScannerClient() {
     setManualInput("");
   }, [manualInput, lookupBarcode, showToast]);
 
-  // const exportErpPdf = async () => {
-  //   const barcodes = history.map((r) => r.barcode);
-
-  //   const res = await fetch("/api/erp-rolls", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({ barcodes }),
-  //   });
-
-  //   const json = await res.json();
-  //   console.log(json);
-
-  //   const { exportErpPdf } = await import("@/components/utils/erpdf");
-
-  //   await exportErpPdf(json.rows);
-  // };
+  useEffect(() => {
+    if (window.__zxingReady) {
+      setTimeout(() => setZxingReady(true), 0); // avoid sync setState warning
+    } else if (window.__zxingError) {
+      showToast("Failed to load scanner library", "error");
+    }
+  }, [showToast]);
 
   return (
     <>
       {/* <Script
-        src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"
-        strategy="afterInteractive"
-        onLoad={() => setZxingReady(true)}
-        onError={() => showToast("Failed to load scanner library", "error")}
-      /> */}
+          onLoad={() => setZxingReady(true)}
+          onError={() => showToast("Failed to load scanner library", "error")}
+        /> */}
 
       <div className="min-h-screen from-slate-50 via-white to-slate-50">
         <PageHeaderErp scanning={scanning} zxingReady={zxingReady} />

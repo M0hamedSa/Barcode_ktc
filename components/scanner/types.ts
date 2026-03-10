@@ -11,7 +11,7 @@ export interface ScanEntry {
   qty04?: number; // ✅ NEW
   selected?: boolean;
   error?: string;
-  locked?: boolean
+  locked?: boolean;
 }
 
 declare global {
@@ -29,5 +29,12 @@ declare global {
         reset(): void;
       };
     };
+  }
+}
+
+declare global {
+  interface Window {
+    __zxingReady?: boolean;
+    __zxingError?: boolean;
   }
 }
