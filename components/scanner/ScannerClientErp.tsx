@@ -143,12 +143,12 @@ export default function ScannerClient() {
 
   return (
     <>
-      <Script
+      {/* <Script
         src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"
         strategy="afterInteractive"
         onLoad={() => setZxingReady(true)}
         onError={() => showToast("Failed to load scanner library", "error")}
-      />
+      /> */}
 
       <div className="min-h-screen from-slate-50 via-white to-slate-50">
         <PageHeaderErp scanning={scanning} zxingReady={zxingReady} />
