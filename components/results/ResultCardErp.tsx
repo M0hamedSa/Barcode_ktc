@@ -3,7 +3,7 @@ import type { ScanEntry } from "../scanner/types";
 import { Badge } from "../ui/Badge";
 import { keyDescriptions } from "../scanner/config";
 
-export function ResultCard({
+export function ResultCardErp({
   entry,
   onToggleSelected,
 }: {
@@ -34,6 +34,33 @@ export function ResultCard({
       setMaxH(0);
     }
   }, [expanded, entry.data, entry.qty02, entry.qty04]);
+
+  const exportErpPdf = async (barcode: string) => {
+    const res = await fetch("/api/erp-rolls", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ barcode }),
+    });
+
+    // Check for HTTP errors before parsing JSON
+    if (!res.ok) {
+      const text = await res.text(); // Read raw response to debug
+      console.error("API error:", res.status, text);
+      throw new Error(`API returned ${res.status}: ${text}`);
+    }
+
+    const json = await res.json();
+    // Guard against missing rows
+    if (!json.rows) {
+      console.error("Unexpected response shape:", json);
+      throw new Error("Response missing 'rows' field");
+    }
+
+    const { exportErpPdf } = await import("@/components/utils/erpdf");
+    await exportErpPdf(json.rows);
+  };
 
   // ───────────── keep your loading / not_found / error blocks above ─────────────
   if (entry.status === "loading") {
@@ -123,7 +150,6 @@ export function ResultCard({
               {entry.barcode}
             </p>
           </div>
-
           {/* ✅ Toggle details button */}
           <button
             type="button"
@@ -135,28 +161,11 @@ export function ResultCard({
 
           <button
             type="button"
-            disabled={entry.locked}
-            onClick={() => onToggleSelected(entry.id)}
-            className={`rounded-xl px-3 py-2 text-[12px] font-semibold border transition
-            ${
-              entry.locked
-                ? "bg-gray-200 text-gray-500 border-gray-200 cursor-not-allowed"
-                : selected
-                  ? "bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700"
-                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
-            }
-  `}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12px] font-semibold text-slate-700 hover:bg-slate-50 transition"
+            onClick={() => exportErpPdf(entry.barcode)}
           >
-            {entry.locked ? "Existing" : selected ? "✓ Added" : "+ Add"}
+            Export
           </button>
-
-          {/* <button
-            type="button"
-            onClick={() => onRemove(entry.id)}
-            className="rounded-xl border border-rose-200 bg-white px-3 py-2 text-[12px] font-semibold text-rose-700 hover:bg-rose-100 transition"
-          >
-            Remove
-          </button> */}
         </div>
       </div>
 

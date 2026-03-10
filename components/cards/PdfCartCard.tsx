@@ -4,12 +4,14 @@ export function PdfCartCard({
   selectedTotalQty02,
   selectedTotalQty04,
   onExport,
+  // onExportErp,
 }: {
   layNo: string;
   selectedCount: number;
-  selectedTotalQty02: number; // ✅ NEW
-  selectedTotalQty04: number; // ✅ NEW
+  selectedTotalQty02: number;
+  selectedTotalQty04: number;
   onExport: () => void;
+  // onExportErp: () => void;
 }) {
   return (
     <div className="rounded-3xl border border-gray-500 bg-white shadow-sm p-4">
@@ -42,6 +44,12 @@ export function PdfCartCard({
       >
         Export PDF
       </button>
+      {/* <button
+        onClick={onExportErp}
+        className="rounded-xl bg-blue-600 text-white px-4 py-2 text-sm font-semibold"
+      >
+        Export ERP PDF
+      </button> */}
     </div>
   );
 }

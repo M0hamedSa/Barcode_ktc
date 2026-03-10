@@ -1,100 +1,265 @@
-t # 📷 ScanDB — Next.js Barcode Scanner + MSSQL
+# Barcode Scanner Web App
 
-A mobile-friendly **Next.js 14** app that scans **Code 39** barcodes via phone camera and looks up records from a **MSSQL** database in real time.
+A modern **Next.js barcode scanning application** designed for warehouse and production environments.
 
----
-
-## 🗂 Project Structure
-
-```
-src/
-├── app/
-│   ├── layout.tsx              # Root layout
-│   ├── page.tsx                # Redirects to /scanner
-│   ├── globals.css             # Global styles + Tailwind
-│   ├── scanner/
-│   │   └── page.tsx            # Scanner page
-│   └── api/
-│       └── lookup/
-│           └── route.ts        # POST /api/lookup — queries MSSQL
-├── components/
-│   └── ScannerClient.tsx       # Full scanner UI (client component)
-└── lib/
-    └── db.ts                   # MSSQL connection pool + query helper
-```
+The system scans roll barcodes, retrieves data from **Microsoft SQL Server**, allows operators to build a **Lay report**, and exports a **professional PDF report**.
 
 ---
 
-## 🚀 Setup
+# Features
 
-### 1. Install dependencies
-```bash
+## Barcode Scanning
+
+- Real-time camera barcode scanning using **ZXing**
+- Manual barcode entry supported
+- Duplicate scans are automatically prevented
+
+## Database Integration
+
+- Connects to **Microsoft SQL Server**
+- Retrieves roll information from database
+- Loads existing rolls for a Lay automatically
+
+## Lay No Workflow
+
+When a user enters a **Lay No**:
+
+1. Existing rolls with the same Lay No are retrieved from the database
+2. They appear in the result list
+3. These rolls are **locked** and cannot be removed
+4. Operators can **scan additional rolls** normally
+
+This ensures previously saved rolls remain part of the report.
+
+---
+
+# Roll Selection Logic
+
+| Type                  | Behavior                   |
+| --------------------- | -------------------------- |
+| Existing roll from DB | Locked (cannot be removed) |
+| New scanned roll      | Can be added/removed       |
+| Duplicate scan        | Automatically ignored      |
+
+---
+
+# Result Cards
+
+Each scanned roll shows:
+
+- Barcode
+- WO Number
+- JO Number
+- QTY_02
+- QTY_04
+- Additional roll details
+
+Result cards include:
+
+- Expand / Collapse animation
+- Copy barcode button
+- Add / Remove button
+- Locked indicator for existing rolls
+
+---
+
+# PDF Report
+
+The system generates a professional **Lay Report PDF** containing:
+
+- Company logo
+- Lay Number
+- Date & Time
+- Barcode table
+- QTY_02 per roll
+- QTY_04 per roll
+
+### Totals included
+
+- Total Rolls
+- Total QTY_02
+- Total QTY_04
+
+Example layout:
+
+```
+[Company Logo]
+
+Barcode Scan Report
+Lay No: 1450
+Date: 2026-03-07
+
+---------------------------------------------
+| Barcode | WO | JO | QTY_02 | QTY_04 |
+---------------------------------------------
+| ...                                   |
+| ...                                   |
+---------------------------------------------
+
+Total Rolls : 25
+Total QTY_02: 850
+Total QTY_04: 960
+```
+
+---
+
+# Saving Lay No to Database
+
+When exporting the PDF:
+
+1. Selected rolls are collected
+2. API `/api/save-lay` is called
+3. Database updates:
+
+```
+act_trn_05.ACT_KEY_01 = Lay No
+WHERE ROLL_BARCODE IN (...)
+```
+
+Only **newly added rolls** are updated.
+
+---
+
+# Tech Stack
+
+| Technology      | Purpose               |
+| --------------- | --------------------- |
+| Next.js 15      | Frontend + API routes |
+| React           | UI components         |
+| Tailwind CSS    | Styling               |
+| ZXing           | Barcode scanning      |
+| MSSQL           | Database              |
+| jsPDF           | PDF generation        |
+| jspdf-autotable | Table rendering       |
+
+---
+
+# Project Structure
+
+```
+src
+ ├ app
+ │  └ api
+ │     ├ lookup
+ │     ├ save-lay
+ │     └ lay-lookup
+ │
+ ├ components
+ │  └ scanner
+ │     ├ cards
+ │     │   ├ CameraCard.tsx
+ │     │   ├ LayNoCard.tsx
+ │     │   ├ PdfCartCard.tsx
+ │     │   └ PageHeader.tsx
+ │     │
+ │     ├ results
+ │     │   ├ ResultCard.tsx
+ │     │   └ ResultsSection.tsx
+ │     │
+ │     ├ hooks
+ │     │   ├ useToast.ts
+ │     │   └ useZxingScanner.ts
+ │     │
+ │     ├ utils
+ │     │   ├ api.ts
+ │     │   └ pdf.ts
+ │     │
+ │     └ types.ts
+ │
+ └ lib
+    └ db.ts
+```
+
+---
+
+# Environment Variables
+
+Create `.env.local`
+
+```
+DB_USER=
+DB_PASSWORD=
+DB_SERVER=
+DB_DATABASE=
+DB_PORT=1433
+
+DB_TABLE=act_trn_05
+DB_BARCODE_COLUMN=ROLL_BARCODE
+
+DB_COLUMNS=WO_NO,JO_NO,ACT_DATA_08,ACT_DATA_09,ACT_DATA_07,QTY_02,QTY_04
+```
+
+---
+
+# Running the Project
+
+Install dependencies
+
+```
 npm install
 ```
 
-### 2. Configure environment
-```bash
-cp .env.example .env.local
+Run development server
+
 ```
-
-Edit `.env.local`:
-```env
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_SERVER=localhost            # or your server IP
-DB_DATABASE=your_database
-DB_PORT=1433
-DB_ENCRYPT=false               # true for Azure SQL
-DB_TRUST_CERT=true
-
-DB_TABLE=your_table_name
-DB_BARCODE_COLUMN=barcode_column_name
-
-# Optional: limit returned columns (comma-separated)
-# DB_COLUMNS=Name,Price,Stock
-DB_COLUMNS=
-```
-
-### 3. Run development server
-```bash
 npm run dev
 ```
 
-Open `http://localhost:3000` (or your local IP on your phone).
+Open
+
+```
+http://localhost:3000
+```
 
 ---
 
-## 📱 How to use on your phone
+# Deployment
 
-1. Make sure your phone is on the same WiFi as your dev machine
-2. Find your machine's local IP (e.g. `192.168.1.100`)
-3. Open `http://192.168.1.100:3000` on your phone
-4. Tap **Start Camera**, allow camera access
-5. Point at a Code 39 barcode — result appears instantly
+Recommended deployment:
 
----
+**Vercel**
 
-## 🌐 Deployment
+Steps:
 
-Since this app needs a Node.js backend (for MSSQL), you **cannot** deploy to Netlify or GitHub Pages. Use:
-
-| Platform | Notes |
-|---|---|
-| **Railway** | Easiest — connects env vars via dashboard |
-| **Render** | Free tier available |
-| **Vercel** | Works but MSSQL must be reachable from Vercel's servers |
-| **VPS/Docker** | Full control |
-
-### Deploy to Railway
-1. Push to GitHub
-2. Create new Railway project → Deploy from GitHub
-3. Add all env vars from `.env.example` in the Railway dashboard
-4. Railway auto-detects Next.js and builds it
+1. Push repository to GitHub
+2. Import project in Vercel
+3. Add environment variables
+4. Deploy
 
 ---
 
-## 🛡 Security Notes
+# Recommended Workflow for Operators
 
-- Never commit `.env.local`
-- For production, ensure MSSQL is not publicly exposed — use a private network or VPN
-- Consider adding API authentication if the app is publicly accessible
+1. Enter **Lay No**
+2. System loads existing rolls
+3. Scan new rolls
+4. Press **Add** on valid rolls
+5. Click **Export PDF**
+6. Lay report is generated and database updated
+
+---
+
+# Security Notes
+
+- SQL queries use **parameterized inputs**
+- Duplicate barcode scanning is prevented
+- Existing Lay rolls are **locked**
+
+---
+
+# Future Improvements
+
+Potential upgrades:
+
+- Duplicate barcode detection warning
+- Multi-page PDF with page numbers
+- Landscape PDF layout
+- Scan history export
+- Barcode validation rules
+- Operator login system
+
+---
+
+# Author
+
+Developed for **production roll tracking and lay reporting systems**.

@@ -1,7 +1,7 @@
 import type { ScanEntry } from "../scanner/types";
-import { ResultCard } from "./ResultCard";
+import { ResultCardErp } from "./ResultCardErp";
 
-export function ResultsSection({
+export function ResultsSectionErp({
   history,
   onClear,
   onToggleSelected,
@@ -29,7 +29,7 @@ export function ResultsSection({
 
       <div className="flex flex-col gap-3">
         {history.map((entry) => (
-          <ResultCard
+          <ResultCardErp
             key={entry.id}
             entry={entry}
             onToggleSelected={onToggleSelected}
