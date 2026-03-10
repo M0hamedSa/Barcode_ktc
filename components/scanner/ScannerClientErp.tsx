@@ -9,7 +9,7 @@ import { useZxingScanner } from "../hooks/useZxingScanner";
 import { apiLookupBarcode } from "../utils/api";
 
 import { Toast } from "../ui/Toast";
-import { PageHeader } from "../cards/PageHeader";
+import { PageHeaderErp } from "../cards/PageHeaderErp";
 import { CameraCard } from "../cards/CameraCard";
 import { ManualEntryCard } from "../cards/ManualEntryCard";
 import { ResultsSectionErp } from "../results/ResultsSectionErp";
@@ -151,7 +151,7 @@ export default function ScannerClient() {
       />
 
       <div className="min-h-screen from-slate-50 via-white to-slate-50">
-        <PageHeader scanning={scanning} zxingReady={zxingReady} />
+        <PageHeaderErp scanning={scanning} zxingReady={zxingReady} />
 
         <main className="mx-auto max-w-md px-4 py-5 flex flex-col gap-5">
           <CameraCard
