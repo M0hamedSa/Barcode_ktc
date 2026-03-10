@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import Script from "next/script";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+// import Script from "next/script";
 
 import type { ScanEntry } from "./types";
 import { useToast } from "../hooks/useToast";
@@ -255,12 +249,12 @@ export default function ScannerClient() {
 
   return (
     <>
-      <Script
+      {/* <Script
         src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"
         strategy="afterInteractive"
         onLoad={() => setZxingReady(true)}
         onError={() => showToast("Failed to load scanner library", "error")}
-      />
+      /> */}
 
       <div className="min-h-screen from-slate-50 via-white to-slate-50">
         <PageHeader scanning={scanning} zxingReady={zxingReady} />
