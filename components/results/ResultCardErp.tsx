@@ -44,31 +44,40 @@ export function ResultCardErp({
     entry.qty06,
   ]);
 
+  const [isExporting, setIsExporting] = useState(false);
+
   const exportErpPdf = async (barcode: string) => {
-    const res = await fetch("/api/erp-rolls", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ barcode }),
-    });
+    setIsExporting(true);
+    try {
+      const res = await fetch("/api/erp-rolls", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ barcode }),
+      });
 
-    // Check for HTTP errors before parsing JSON
-    if (!res.ok) {
-      const text = await res.text(); // Read raw response to debug
-      console.error("API error:", res.status, text);
-      throw new Error(`API returned ${res.status}: ${text}`);
+      // Check for HTTP errors before parsing JSON
+      if (!res.ok) {
+        const text = await res.text(); // Read raw response to debug
+        console.error("API error:", res.status, text);
+        throw new Error(`API returned ${res.status}: ${text}`);
+      }
+
+      const json = await res.json();
+      // Guard against missing rows
+      if (!json.rows) {
+        console.error("Unexpected response shape:", json);
+        throw new Error("Response missing 'rows' field");
+      }
+
+      const { exportErpPdf } = await import("@/components/utils/erpdf");
+      await exportErpPdf(json.rows);
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setIsExporting(false);
     }
-
-    const json = await res.json();
-    // Guard against missing rows
-    if (!json.rows) {
-      console.error("Unexpected response shape:", json);
-      throw new Error("Response missing 'rows' field");
-    }
-
-    const { exportErpPdf } = await import("@/components/utils/erpdf");
-    await exportErpPdf(json.rows);
   };
 
   // ───────────── keep your loading / not_found / error blocks above ─────────────
@@ -171,10 +180,14 @@ export function ResultCardErp({
 
           <button
             type="button"
-            className="rounded-xl border border-fuchsia-500 dark:border-fuchsia-500/50 bg-fuchsia-100 dark:bg-fuchsia-900/40 text-fuchsia-700 dark:text-fuchsia-400 px-3 py-2 text-[12px] font-bold hover:bg-fuchsia-200 dark:hover:bg-fuchsia-900/60 transition shadow-sm active:scale-95"
+            disabled={isExporting}
+            className="rounded-xl border border-fuchsia-500 dark:border-fuchsia-500/50 bg-fuchsia-100 dark:bg-fuchsia-900/40 text-fuchsia-700 dark:text-fuchsia-400 px-3 py-2 text-[12px] font-bold hover:bg-fuchsia-200 dark:hover:bg-fuchsia-900/60 transition shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             onClick={() => exportErpPdf(entry.barcode)}
           >
-            Export
+            {isExporting && (
+              <div className="h-3 w-3 animate-spin rounded-full border-2 border-fuchsia-500/20 border-t-fuchsia-700 dark:border-t-fuchsia-400" />
+            )}
+            <span>Export</span>
           </button>
         </div>
       </div>

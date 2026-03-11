@@ -17,6 +17,7 @@ export default function ScannerClient() {
   const [zxingReady, setZxingReady] = useState(false);
   const [history, setHistory] = useState<ScanEntry[]>([]);
   const [manualInput, setManualInput] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const beepRef = useRef<HTMLAudioElement | null>(null);
   const entryIdRef = useRef(0);
   const { toast, showToast } = useToast();
@@ -60,6 +61,7 @@ export default function ScannerClient() {
         return;
       }
 
+      setIsSearching(true);
       const id = addLoadingRow(trimmed);
 
       try {
@@ -94,6 +96,8 @@ export default function ScannerClient() {
         patchRow(id, { status: "error", error: json.error || "Server error" });
       } catch {
         patchRow(id, { status: "error", error: "Cannot reach server" });
+      } finally {
+        setIsSearching(false);
       }
     },
     [addLoadingRow, patchRow, showToast, history],
@@ -162,6 +166,7 @@ export default function ScannerClient() {
             manualInput={manualInput}
             onChange={setManualInput}
             onSubmit={manualSubmit}
+            loading={isSearching}
           />
 
           <ResultsSectionErp

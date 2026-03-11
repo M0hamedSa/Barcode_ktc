@@ -22,6 +22,9 @@ export default function ScannerClient() {
   const [history, setHistory] = useState<ScanEntry[]>([]);
   const [manualInput, setManualInput] = useState("");
   const [layNo, setLayNo] = useState("");
+  const [isLoadingLay, setIsLoadingLay] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const beepRef = useRef<HTMLAudioElement | null>(null);
   const entryIdRef = useRef(0);
   const { toast, showToast } = useToast();
@@ -65,6 +68,7 @@ export default function ScannerClient() {
         return;
       }
 
+      setIsSearching(true);
       const id = addLoadingRow(trimmed);
 
       try {
@@ -99,6 +103,8 @@ export default function ScannerClient() {
         patchRow(id, { status: "error", error: json.error || "Server error" });
       } catch {
         patchRow(id, { status: "error", error: "Cannot reach server" });
+      } finally {
+        setIsSearching(false);
       }
     },
     [addLoadingRow, patchRow, showToast, history],
@@ -178,6 +184,7 @@ export default function ScannerClient() {
 
     const selectedBarcodes = selectedRows.map((e) => e.barcode);
 
+    setIsExporting(true);
     // ✅ 1) Save Lay No to DB for selected barcodes only
     try {
       const res = await fetch("/api/save-lay", {
@@ -201,10 +208,12 @@ export default function ScannerClient() {
 
     // ✅ 2) After DB save succeeds → generate pdf
     await exportScanPdf({ layNo: lay, rows: selectedRows });
+    setIsExporting(false);
   }, [layNo, history, showToast]);
 
   const loadLayNo = useCallback(
     async (lay: string) => {
+      setIsLoadingLay(true);
       try {
         const res = await fetch("/api/lay-lookup", {
           method: "POST",
@@ -235,6 +244,8 @@ export default function ScannerClient() {
         setHistory(rows);
       } catch {
         showToast("Cannot load Lay No data", "error");
+      } finally {
+        setIsLoadingLay(false);
       }
     },
     [showToast],
@@ -274,6 +285,7 @@ export default function ScannerClient() {
           <LayNoCard
             layNo={layNo}
             onChange={handleLayNoChange} // 👈 use this instead of setLayNo
+            loading={isLoadingLay}
             onClear={() => {
               setLayNo("");
               setHistory([]); // optional: clear loaded rows
@@ -293,12 +305,14 @@ export default function ScannerClient() {
             selectedTotalQty={selectedTotalQty}
             selectedTotalQtyGrs={selectedTotalQtyGrs}
             onExport={exportPdf}
+            loading={isExporting}
           />
 
           <ManualEntryCard
             manualInput={manualInput}
             onChange={setManualInput}
             onSubmit={manualSubmit}
+            loading={isSearching}
           />
 
           <ResultsSection

@@ -4,14 +4,14 @@ export function PdfCartCard({
   selectedTotalQty,
   selectedTotalQtyGrs,
   onExport,
-  // onExportErp,
+  loading = false,
 }: {
   layNo: string;
   selectedCount: number;
   selectedTotalQty: number;
   selectedTotalQtyGrs: number;
   onExport: () => void;
-  // onExportErp: () => void;
+  loading?: boolean;
 }) {
   return (
     <div className="rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl shadow-xl p-5 transition-colors">
@@ -47,16 +47,18 @@ export function PdfCartCard({
       <button
         type="button"
         onClick={onExport}
-        className="mt-4 w-full rounded-2xl bg-emerald-600 dark:bg-emerald-500 text-white py-3 text-[13px] font-extrabold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+        disabled={loading}
+        className="mt-4 w-full flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 dark:bg-emerald-500 text-white py-3 text-[13px] font-extrabold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        Export PDF
+        {loading ? (
+          <>
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+            <span>Exporting...</span>
+          </>
+        ) : (
+          "Export PDF"
+        )}
       </button>
-      {/* <button
-        onClick={onExportErp}
-        className="rounded-xl bg-blue-600 text-white px-4 py-2 text-sm font-semibold"
-      >
-        Export ERP PDF
-      </button> */}
     </div>
   );
 }

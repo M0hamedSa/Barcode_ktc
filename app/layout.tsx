@@ -16,9 +16,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KTC Scanner | Professional Barcode Management",
+  metadataBase: new URL("https://ktc-scanner.vercel.app"), // Replace with your actual domain
+  title: {
+    default: "KTC Scanner Hub | Production Management",
+    template: "%s | KTC Scanner",
+  },
   description:
-    "Modern barcode scanning and Lay No reporting system for production and warehouse environments. Real-time data sync with MSSQL and professional PDF exports.",
+    "Modern barcode scanning and reporting system for KTC production environments.",
+  applicationName: "KTC Scanner",
+  authors: [{ name: "KTC Production Systems" }],
+  generator: "Next.js",
   keywords: [
     "barcode scanner",
     "production tracking",
@@ -28,22 +35,30 @@ export const metadata: Metadata = {
     "KTC",
     "Lay No report",
   ],
-  authors: [{ name: "KTC Production Systems" }],
-  openGraph: {
-    title: "KTC Scanner | Smart Production Tracking",
-    description:
-      "Steamline your warehouse workflow with real-time barcode scanning and automated reporting.",
-    type: "website",
-    locale: "en_US",
+  referrer: "origin-when-cross-origin",
+  creator: "KTC IT Department",
+  publisher: "KTC",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
   },
-  icons: {
-    icon: "/favicon.png",
-    apple: "/favicon.png",
+  openGraph: {
+    title: "KTC Scanner | Smart Production Hub",
+    description:
+      "Streamline your warehouse workflow with real-time barcode scanning and automated reporting.",
+    url: "https://ktc-scanner.vercel.app",
+    siteName: "KTC Scanner",
+    locale: "en_US",
+    type: "website",
   },
 };
 
 export const viewport = {
-  themeColor: "#059669", // emerald-600
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#020617" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
