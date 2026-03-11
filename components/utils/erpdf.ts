@@ -56,19 +56,32 @@ export async function exportErpPdf(rows: any[]) {
   });
 
   // ── Header ──
+  const margin = 14;
+
+  const logo = new Image();
+  logo.src = "/logo.png";
+  await new Promise((resolve) => {
+    logo.onload = resolve;
+  });
+  doc.addImage(logo, "PNG", margin, 10, 40, 12);
+
   doc.setFontSize(16);
-  doc.text("ERP Roll Report", 14, 18);
+  doc.text("ERP Roll Report", margin, 30);
+
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
-  doc.text(`Date: ${new Date().toLocaleString()}`, 14, 26);
+  doc.text(`WO NO: ${row.WO_NO ?? ""}`, margin, 38);
+  doc.text(`JO NO: ${row.JO_NO ?? ""}`, 90, 38);
+  doc.text(`Barcode: ${row.ROLL_BARCODE ?? ""}`, margin, 44);
+  doc.text(`Date: ${new Date().toLocaleString()}`, 90, 44);
 
   // ── DYE Table ──
   doc.setFontSize(13);
   doc.setFont("helvetica", "bold");
-  doc.text("DYE", 14, 36);
+  doc.text("DYE", margin, 54);
 
   autoTable(doc, {
-    startY: 40,
+    startY: 58,
     head: [["Desc", "Value", "Desc", "Value"]],
     body: buildGridBody(dyeFields),
     theme: "grid",
@@ -111,5 +124,5 @@ export async function exportErpPdf(rows: any[]) {
     },
   });
 
-  doc.save("erp_roll_report.pdf");
+  doc.save(`${row.ROLL_BARCODE}.pdf`);
 }
