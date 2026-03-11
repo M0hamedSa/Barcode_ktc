@@ -6,7 +6,6 @@ export async function POST(req: NextRequest) {
     const { barcode } = await req.json();
     const barcodeArray = Array.isArray(barcode) ? barcode : [barcode]; // normalize
     const rows = await getErpRolls(barcodeArray);
-    console.log(rows);
 
     return NextResponse.json({
       success: true,

@@ -38,21 +38,20 @@ export function ResultCard({
   // ───────────── keep your loading / not_found / error blocks above ─────────────
   if (entry.status === "loading") {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        {/* ... keep your loading UI ... */}
+      <div className="rounded-2xl border border-slate-200/50 dark:border-slate-800/50 bg-white dark:bg-slate-900 p-4 shadow-sm transition-colors">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl border border-slate-200 bg-slate-50 grid place-items-center">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-slate-600" />
+          <div className="h-9 w-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 grid place-items-center">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 dark:border-slate-700 border-t-slate-600 dark:border-t-slate-300" />
           </div>
           <div className="min-w-0">
-            <p className="text-[12px] font-semibold text-slate-800">
+            <p className="text-[12px] font-semibold text-slate-800 dark:text-slate-200">
               Querying database…
             </p>
-            <p className="mt-0.5 truncate font-mono text-[12px] text-slate-600">
+            <p className="mt-0.5 truncate font-mono text-[12px] text-slate-600 dark:text-slate-400">
               {entry.barcode}
             </p>
           </div>
-          <span className="ml-auto text-[11px] text-slate-500">
+          <span className="ml-auto text-[11px] text-slate-500 dark:text-slate-500">
             {entry.time}
           </span>
         </div>
@@ -62,30 +61,29 @@ export function ResultCard({
 
   if (entry.status === "not_found" || entry.status === "error") {
     return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 shadow-sm">
-        {/* ... keep your error UI ... */}
+      <div className="rounded-2xl border border-rose-200/50 dark:border-rose-900/50 bg-rose-50/50 dark:bg-rose-950/30 p-4 shadow-sm transition-colors">
         <div className="flex items-start gap-3">
-          <div className="h-9 w-9 rounded-xl border border-rose-200 bg-white grid place-items-center">
+          <div className="h-9 w-9 rounded-xl border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-900 grid place-items-center">
             <span className="text-xl">⚠️</span>
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <p className="text-[13px] font-bold text-rose-700">
+              <p className="text-[13px] font-bold text-rose-700 dark:text-rose-400">
                 {entry.status === "not_found" ? "Not Found" : "Error"}
               </p>
               <Badge tone="rose">{entry.time}</Badge>
             </div>
-            <p className="mt-1 text-[12px] text-rose-700/90">
+            <p className="mt-1 text-[12px] text-rose-700/90 dark:text-rose-400/90">
               {entry.error || "Something went wrong"}
             </p>
-            <p className="mt-2 truncate font-mono text-[12px] text-rose-700/80">
+            <p className="mt-2 truncate font-mono text-[12px] text-rose-700/80 dark:text-rose-400/80">
               {entry.barcode}
             </p>
           </div>
           <button
             type="button"
             onClick={copyCode}
-            className="rounded-xl border border-rose-200 bg-white px-3 py-2 text-[12px] font-semibold text-rose-700 hover:bg-rose-100 transition"
+            className="rounded-xl border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-900 px-3 py-2 text-[12px] font-semibold text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition"
           >
             Copy
           </button>
@@ -102,24 +100,24 @@ export function ResultCard({
   );
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-slate-200/50 dark:border-slate-800/50 bg-white dark:bg-slate-900 shadow-sm overflow-hidden transition-colors">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-slate-200 from-slate-50 to-white">
+      <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-linear-to-b from-slate-50 dark:from-slate-800/50 to-white dark:to-slate-900">
         <div className="flex items-center gap-2 flex-wrap">
           <Badge tone="emerald">Found</Badge>
           <Badge tone="slate">QTY : {entry.qty02 ?? "—"}</Badge>
           <Badge tone="slate">QTY GRS : {entry.qty04 ?? "—"}</Badge>
-          <span className="ml-auto text-[11px] text-slate-500">
+          <span className="ml-auto text-[11px] text-slate-500 dark:text-slate-400">
             {entry.time}
           </span>
         </div>
 
         <div className="mt-3 flex items-center gap-2">
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase">
+            <p className="text-[11px] font-semibold tracking-wide text-slate-500 dark:text-slate-400 uppercase">
               Barcode
             </p>
-            <p className="truncate font-mono text-[14px] font-semibold text-slate-900">
+            <p className="truncate font-mono text-[14px] font-semibold text-slate-900 dark:text-slate-100">
               {entry.barcode}
             </p>
           </div>
@@ -128,7 +126,7 @@ export function ResultCard({
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12px] font-semibold text-slate-700 hover:bg-slate-50 transition"
+            className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-[12px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
           >
             {expanded ? "Hide" : "Show"}
           </button>
@@ -140,23 +138,15 @@ export function ResultCard({
             className={`rounded-xl px-3 py-2 text-[12px] font-semibold border transition
             ${
               entry.locked
-                ? "bg-gray-200 text-gray-500 border-gray-200 cursor-not-allowed"
+                ? "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-600 border-slate-200 dark:border-slate-800 cursor-not-allowed"
                 : selected
-                  ? "bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700"
-                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                  ? "bg-emerald-600 dark:bg-emerald-500 text-white border-emerald-600 hover:bg-emerald-700"
+                  : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
             }
   `}
           >
             {entry.locked ? "Existing" : selected ? "✓ Added" : "+ Add"}
           </button>
-
-          {/* <button
-            type="button"
-            onClick={() => onRemove(entry.id)}
-            className="rounded-xl border border-rose-200 bg-white px-3 py-2 text-[12px] font-semibold text-rose-700 hover:bg-rose-100 transition"
-          >
-            Remove
-          </button> */}
         </div>
       </div>
 
@@ -174,12 +164,12 @@ export function ResultCard({
             {dataEntries.map(([key, val]) => (
               <div
                 key={key}
-                className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+                className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 p-3"
               >
-                <p className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase">
+                <p className="text-[11px] font-semibold tracking-wide text-slate-500 dark:text-slate-400 uppercase">
                   {keyDescriptions[key] || key}
                 </p>
-                <p className="mt-1 text-[14px] font-semibold text-slate-900">
+                <p className="mt-1 text-[14px] font-semibold text-slate-900 dark:text-slate-100">
                   {String(val ?? "—")}
                 </p>
               </div>

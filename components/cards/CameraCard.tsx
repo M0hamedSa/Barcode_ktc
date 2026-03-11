@@ -14,12 +14,14 @@ export function CameraCard({
   onStop: () => void;
 }) {
   return (
-    <div className="rounded-3xl border border-gray-400 bg-white shadow-sm overflow-hidden">
-      <div className="p-4 border-b border-gray-40 from-slate-1000 to-white">
+    <div className="rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl shadow-xl overflow-hidden transition-colors">
+      <div className="p-4 border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/50 backdrop-blur-md">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Badge tone="sky">Camera</Badge>
-            <span className="text-[12px] text-slate-600">{camLabel}</span>
+            <span className="text-[12px] text-slate-600 dark:text-slate-400 font-medium truncate max-w-[120px]">
+              {camLabel}
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -27,7 +29,7 @@ export function CameraCard({
               type="button"
               onClick={onStart}
               disabled={scanning || !zxingReady}
-              className="rounded-xl px-3 py-2 text-[12px] font-semibold text-white bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-green-800 transition"
+              className="rounded-xl px-4 py-2 text-[12px] font-bold text-white bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-600 transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
             >
               Start
             </button>
@@ -35,7 +37,7 @@ export function CameraCard({
               type="button"
               onClick={onStop}
               disabled={!scanning}
-              className="rounded-xl px-3 py-2 text-[12px] font-semibold border border-slate-200 bg-white text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition"
+              className="rounded-xl px-4 py-2 text-[12px] font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-all active:scale-95 shadow-sm"
             >
               Stop
             </button>
@@ -53,12 +55,12 @@ export function CameraCard({
         />
 
         {!scanning && (
-          <div className="absolute inset-0 grid place-items-center bg-slate-950/20">
-            <div className="rounded-2xl border border-white/20 bg-white/70 backdrop-blur px-4 py-3 text-center shadow">
-              <p className="text-[13px] font-semibold text-slate-900">
+          <div className="absolute inset-0 grid place-items-center bg-slate-900/60 backdrop-blur-sm transition-all duration-300">
+            <div className="rounded-3xl border border-white/20 bg-white/10 dark:bg-black/20 backdrop-blur-md px-6 py-4 text-center shadow-2xl">
+              <p className="text-[14px] font-extrabold text-white">
                 {zxingReady ? "Tap Start to scan" : "Loading scanner…"}
               </p>
-              <p className="mt-1 text-[12px] text-slate-600">
+              <p className="mt-1 text-[12px] text-white/80 font-medium tracking-wide">
                 Hold barcode inside the frame
               </p>
             </div>

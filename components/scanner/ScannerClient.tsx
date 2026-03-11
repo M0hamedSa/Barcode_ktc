@@ -16,7 +16,7 @@ import { CameraCard } from "../cards/CameraCard";
 import { PdfCartCard } from "../cards/PdfCartCard";
 import { ManualEntryCard } from "../cards/ManualEntryCard";
 import { ResultsSection } from "../results/ResultsSection";
-import Script from "next/script";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function ScannerClient() {
   const [zxingReady, setZxingReady] = useState(false);
@@ -186,36 +186,28 @@ export default function ScannerClient() {
     await exportScanPdf({ layNo: lay, rows: selectedRows });
   }, [layNo, history, showToast]);
 
-  const loadLayNo = async (lay: string) => {
-    try {
-      const res = await fetch("/api/lay-lookup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ layNo: lay }),
-      });
-      const json = await res.json();
-
-      if (!res.ok || !json.success) return;
-
-      const rows = json.rows.map((r: any) => ({
-        id: Math.random(),
-        barcode: r.ROLL_BARCODE,
-        time: "Existing",
-        status: "found",
-        data: r,
-        qty02: Number(r.QTY_02) || 0,
-        qty04: Number(r.QTY_04) || 0,
-        selected: true,
-        locked: true, // 🔒 cannot remove
-      }));
-
-      setHistory(rows);
-    } catch {
-      showToast("Cannot load Lay No data", "error");
-    }
-  };
+  const loadLayNo = useCallback(
+    async (lay: string) => {
+      try {
+        const res = await fetch("/api/lay-lookup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ Lay_No: lay }),
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          showToast(json.error || "Lookup failed", "error");
+          return;
+        }
+        setHistory(json.results || []);
+      } catch {
+        showToast("Cannot reach server for lookup", "error");
+      }
+    },
+    [showToast],
+  );
 
   const handleLayNoChange = useCallback(
     (val: string) => {
@@ -223,7 +215,7 @@ export default function ScannerClient() {
 
       // Only fetch when it looks valid
       if (val.trim().length > 0) {
-        loadLayNo(val.trim());
+        void loadLayNo(val.trim());
       }
     },
     [loadLayNo],
@@ -258,12 +250,15 @@ export default function ScannerClient() {
 
   return (
     <>
-      {/* <Script
-        onLoad={() => setZxingReady(true)}
-        onError={() => showToast("Failed to load scanner library", "error")}
-      /> */}
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative">
+        {/* Emerald accent background decorations */}
+        <div className="absolute top-[-10%] left-[-10%] w-160 h-160 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 blur-[120px] pointer-events-none" />
 
-      <div className="min-h-screen from-slate-50 via-white to-slate-50">
+        {/* Theme Toggle Top Right */}
+        <div className="absolute top-3 right-4 z-50">
+          <ThemeToggle />
+        </div>
+
         <PageHeader scanning={scanning} zxingReady={zxingReady} />
 
         <main className="mx-auto max-w-md px-4 py-5 flex flex-col gap-5">

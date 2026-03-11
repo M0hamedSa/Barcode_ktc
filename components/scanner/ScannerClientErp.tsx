@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Script from "next/script";
 
 import type { ScanEntry } from "./types";
 import { useToast } from "../hooks/useToast";
@@ -13,6 +12,7 @@ import { PageHeaderErp } from "../cards/PageHeaderErp";
 import { CameraCard } from "../cards/CameraCard";
 import { ManualEntryCard } from "../cards/ManualEntryCard";
 import { ResultsSectionErp } from "../results/ResultsSectionErp";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function ScannerClient() {
   const [zxingReady, setZxingReady] = useState(false);
@@ -132,12 +132,15 @@ export default function ScannerClient() {
 
   return (
     <>
-      {/* <Script
-          onLoad={() => setZxingReady(true)}
-          onError={() => showToast("Failed to load scanner library", "error")}
-        /> */}
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative overflow-hidden">
+        {/* Subtle background decoration */}
+        <div className="absolute top-[-10%] right-[-10%] w-160 h-160 rounded-full bg-fuchsia-500/20 dark:bg-fuchsia-500/10 blur-[120px] pointer-events-none" />
 
-      <div className="min-h-screen from-slate-50 via-white to-slate-50">
+        {/* Theme Toggle Top Right */}
+        <div className="absolute top-3 right-4 z-50">
+          <ThemeToggle />
+        </div>
+
         <PageHeaderErp scanning={scanning} zxingReady={zxingReady} />
 
         <main className="mx-auto max-w-md px-4 py-5 flex flex-col gap-5">
