@@ -110,5 +110,5 @@ export async function exportScanPdf({
   doc.text(`Total GRS QTY: ${totalQtyGrs.toFixed(2)}`, margin, y + 16);
 
   // ───────────── Save ─────────────
-  doc.save(`lay_${layNo}_${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`LAY_${layNo}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }

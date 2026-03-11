@@ -112,8 +112,8 @@ export async function exportErpPdf(rows: Record<string, any>[]) {
   await new Promise((resolve) => {
     logo.onload = resolve;
   });
-  // Logo (Top Right)
-  doc.addImage(logo, "PNG", pageWidth - margin - 45, 5, 45, 25);
+  // Logo (Top Right) - Smaller
+  doc.addImage(logo, "PNG", pageWidth - margin - 35, 5, 35, 18);
 
   // ── Barcode Image (Top Left) ──
   if (row.ROLL_BARCODE) {
@@ -128,109 +128,125 @@ export async function exportErpPdf(rows: Record<string, any>[]) {
         margin: 0,
       });
       const barcodeDataUrl = canvas.toDataURL("image/png");
-      doc.addImage(barcodeDataUrl, "PNG", margin, 8, 70, 22);
+      doc.addImage(barcodeDataUrl, "PNG", margin, 5, 55, 15);
     } catch (err) {
       console.error("Barcode generation failed", err);
     }
   }
 
   doc.setFont("Amiri", "normal");
-  doc.setFontSize(22);
-  doc.text("تقرير فحص التوب", rightEdge, 35, { align: "right" });
+  doc.setFontSize(16);
+  doc.text("تقرير فحص التوب", rightEdge, 28, { align: "right" });
+
+  doc.setFontSize(9);
+  const labelCol1 = rightEdge;
+  const valCol1 = rightEdge - 20;
+  const labelCol2 = rightEdge - 65;
+  const valCol2 = rightEdge - 85;
+  const labelCol3 = rightEdge - 130;
+  const valCol3 = rightEdge - 150;
+
+  // Row 1
+  doc.text("امر التشغيل", labelCol1, 35, { align: "right" });
+  doc.text(String(row.WO_NO ?? ""), valCol1, 35, { align: "right" });
+
+  doc.text("الحوض", labelCol2, 35, { align: "right" });
+  doc.text(String(row.JO_NO ?? ""), valCol2, 35, { align: "right" });
+
+  doc.text("التاريخ", labelCol3, 35, { align: "right" });
+  doc.text(new Date().toLocaleDateString("en-GB"), valCol3, 35, {
+    align: "right",
+  });
+
+  // Row 2
+  doc.text("اللون", labelCol1, 41, { align: "right" });
+  doc.text(String(row.COLOR_DESC ?? ""), valCol1, 41, { align: "right" });
+
+  doc.text("كود اللون", labelCol2, 41, { align: "right" });
+  doc.text(String(row.COLOR_CODE ?? ""), valCol2, 41, { align: "right" });
+
+  doc.text("الوزن", labelCol3, 41, { align: "right" });
+
+  doc.text(String(row.ROll_WEIGHT ?? ""), valCol3, 41, { align: "right" });
+
+  // ── KNT Table ──
+  doc.setFontSize(11);
+  doc.setFont("Amiri", "normal");
+  doc.text("النسيج", rightEdge, 50, { align: "right" });
 
   doc.setFontSize(11);
-  const labelCol1 = rightEdge;
-  const valCol1 = rightEdge - 25;
-  const labelCol2 = rightEdge - 85;
-  const valCol2 = rightEdge - 110;
-
-  // Column 1 (Right)
-  doc.text("امر التشغيل", labelCol1, 45, { align: "right" });
-  doc.text(String(row.WO_NO ?? ""), valCol1, 45, { align: "right" });
-
-  doc.text("اللون", labelCol1, 52, { align: "right" });
-  doc.text(String(row.COLOR_DESC ?? ""), valCol1, 52, { align: "right" });
-
-  doc.text("التاريخ", labelCol1, 59, { align: "right" });
-  doc.text(new Date().toLocaleString("en-US"), valCol1, 59, { align: "right" });
-
-  // Column 2 (Middle)
-  doc.text("الحوض", labelCol2, 45, { align: "right" });
-  doc.text(String(row.JO_NO ?? ""), valCol2, 45, { align: "right" });
-
-  doc.text("كود اللون", labelCol2, 52, { align: "right" });
-  doc.text(String(row.COLOR_CODE ?? ""), valCol2, 52, { align: "right" });
-
-  doc.text("الوزن الصافي", labelCol2, 59, { align: "right" });
-  const net = (Number(row.QTY_02) || 0) + (Number(row.QTY_04) || 0);
-  doc.text(net.toFixed(2), valCol2, 59, { align: "right" });
-
-  doc.text("الوزن القائم", labelCol1, 66, { align: "right" });
-  const gross = (Number(row.QTY_05) || 0) + (Number(row.QTY_06) || 0);
-  doc.text(gross.toFixed(2), valCol1, 66, { align: "right" });
-
-  // ── KNT Table ──+
-  doc.setFontSize(14);
-  doc.setFont("Amiri", "normal");
-  doc.text("النسيج", rightEdge, 75, { align: "right" });
-
-  doc.setFontSize(12);
-  doc.text(getKntStatusText(row.KNT_DOC_STATUS), rightEdge - 11, 75, {
+  doc.text(getKntStatusText(row.KNT_DOC_STATUS), rightEdge - 10, 50, {
     align: "right",
   });
 
   autoTable(doc, {
-    startY: 79,
+    startY: 53,
     head: [["القيمة", "الوصف", "القيمة", "الوصف"]],
     body: buildGridBody(kntFields),
     theme: "grid",
     rtl: true,
-    styles: { font: "Amiri", fontStyle: "normal", halign: "right" },
+    styles: {
+      font: "Amiri",
+      fontStyle: "normal",
+      halign: "right",
+      fontSize: 9.5,
+      cellPadding: 2.0,
+    },
     headStyles: {
       fillColor: [39, 174, 96],
       font: "Amiri",
       fontStyle: "normal",
       halign: "right",
+      fontSize: 9.5,
     },
     columnStyles: {
-      0: { cellWidth: 45 },
-      1: { cellWidth: 45 },
-      2: { cellWidth: 45 },
-      3: { cellWidth: 45 },
+      0: { cellWidth: 46 },
+      1: { cellWidth: 46 },
+      2: { cellWidth: 46 },
+      3: { cellWidth: 46 },
     },
   } as any);
 
   // ── DYE Table ──
-  const dyeY = (doc as any).lastAutoTable.finalY + 12;
-  doc.setFontSize(14);
+  const dyeY = (doc as any).lastAutoTable.finalY + 6;
+  doc.setFontSize(11);
   doc.setFont("Amiri", "normal");
   doc.text("الصباغة", rightEdge, dyeY, { align: "right" });
 
-  doc.setFontSize(12);
-  doc.text(getDyeStatusText(row.DYE_DOC_STATUS), rightEdge - 13, dyeY, {
+  doc.setFontSize(11);
+  doc.text(getDyeStatusText(row.DYE_DOC_STATUS), rightEdge - 11, dyeY, {
     align: "right",
   });
 
   autoTable(doc, {
-    startY: dyeY + 4,
+    startY: dyeY + 3,
     head: [["القيمة", "الوصف", "القيمة", "الوصف"]],
     body: buildGridBody(dyeFields),
     theme: "grid",
     rtl: true,
-    styles: { font: "Amiri", fontStyle: "normal", halign: "right" },
+    styles: {
+      font: "Amiri",
+      fontStyle: "normal",
+      halign: "right",
+      fontSize: 9.5,
+      cellPadding: 2.0,
+    },
     headStyles: {
       fillColor: [41, 128, 185],
       font: "Amiri",
       fontStyle: "normal",
       halign: "right",
+      fontSize: 9.5,
     },
     columnStyles: {
-      0: { cellWidth: 45 },
-      1: { cellWidth: 45 },
-      2: { cellWidth: 45 },
-      3: { cellWidth: 45 },
+      0: { cellWidth: 46 },
+      1: { cellWidth: 46 },
+      2: { cellWidth: 46 },
+      3: { cellWidth: 46 },
     },
   } as any);
 
-  doc.save(`${row.ROLL_BARCODE}.pdf`);
+  doc.save(
+    `(${row.ROLL_BARCODE})_${new Date().toISOString().slice(0, 10)}.pdf`,
+  );
 }

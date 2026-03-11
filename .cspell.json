@@ -1,0 +1,14 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "Amiri",
+    "jsbarcode",
+    "jspdf",
+    "autotable",
+    "res-font",
+    "res-logo",
+    "barcode-scanner"
+  ],
+  "ignorePaths": ["node_modules", ".next", "public/fonts"]
+}
