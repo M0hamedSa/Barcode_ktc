@@ -180,7 +180,7 @@ export async function exportErpPdf(rows: Record<string, any>[]) {
   });
 
   autoTable(doc, {
-    startY: 53,
+    startY: 58,
     head: [["القيمة", "الوصف", "القيمة", "الوصف"]],
     body: buildGridBody(kntFields),
     theme: "grid",
@@ -208,7 +208,7 @@ export async function exportErpPdf(rows: Record<string, any>[]) {
   } as any);
 
   // ── DYE Table ──
-  const dyeY = (doc as any).lastAutoTable.finalY + 6;
+  const dyeY = (doc as any).lastAutoTable.finalY + 10;
   doc.setFontSize(11);
   doc.setFont("Amiri", "normal");
   doc.text("الصباغة", rightEdge, dyeY, { align: "right" });
@@ -219,7 +219,7 @@ export async function exportErpPdf(rows: Record<string, any>[]) {
   });
 
   autoTable(doc, {
-    startY: dyeY + 3,
+    startY: dyeY + 8,
     head: [["القيمة", "الوصف", "القيمة", "الوصف"]],
     body: buildGridBody(dyeFields),
     theme: "grid",

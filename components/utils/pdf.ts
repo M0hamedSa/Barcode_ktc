@@ -50,14 +50,31 @@ export async function exportScanPdf({
   doc.text(`Lay No: ${layNo}`, margin, 40);
   doc.text(`Date: ${new Date().toLocaleString()}`, margin, 46);
 
+  const JsBarcode = (await import("jsbarcode")).default;
+
   // ───────────── Table Rows ─────────────
-  const body = rows.map((e) => [
-    String(e.barcode ?? ""),
-    String(e.data?.WO_NO ?? ""),
-    String(e.data?.JO_NO ?? ""),
-    ((Number(e.qty02) || 0) + (Number(e.qty04) || 0)).toFixed(2),
-    ((Number(e.qty05) || 0) + (Number(e.qty06) || 0)).toFixed(2),
-  ]);
+  const body = rows.map((e) => {
+    let barcodeDataUrl = "";
+    if (e.barcode) {
+      const canvas = document.createElement("canvas");
+      JsBarcode(canvas, String(e.barcode), {
+        format: "CODE128",
+        displayValue: false,
+        height: 20,
+        margin: 0,
+      });
+      barcodeDataUrl = canvas.toDataURL("image/png");
+    }
+
+    return [
+      { content: String(e.barcode ?? ""), barcodeDataUrl }, // Column 0: Includes text for autoTable to render
+      String(e.data?.WO_NO ?? ""),
+      String(e.data?.JO_NO ?? ""),
+      ((Number(e.qty02) || 0) + (Number(e.qty04) || 0)).toFixed(2),
+      ((Number(e.qty05) || 0) + (Number(e.qty06) || 0)).toFixed(2),
+      String(e.barcode ?? ""), // Column 5: Barcode Text (Hidden)
+    ];
+  });
 
   autoTable(doc, {
     startY: 52,
@@ -65,25 +82,42 @@ export async function exportScanPdf({
     body,
     theme: "grid",
     styles: {
-      fontSize: 10,
-      cellPadding: 3,
+      fontSize: 9,
+      cellPadding: 1,
       font: "Amiri",
+      minCellHeight: 16,
+      valign: "bottom",
+      halign: "center",
     },
     headStyles: {
       fillColor: [30, 41, 59],
       textColor: 255,
       font: "Amiri",
+      halign: "center",
     },
     alternateRowStyles: {
       fillColor: [248, 250, 252],
     },
     margin: { left: margin, right: margin },
     columnStyles: {
-      0: { cellWidth: 20 },
-      1: { cellWidth: 55 },
-      2: { cellWidth: 55 },
+      0: { cellWidth: 50 },
+      1: { cellWidth: 38 },
+      2: { cellWidth: 38 },
       3: { cellWidth: 25 },
       4: { cellWidth: 25 },
+    },
+    didDrawCell: (data) => {
+      if (data.section === "body" && data.column.index === 0) {
+        const raw = data.cell.raw as { barcodeDataUrl?: string };
+        const barcodeDataUrl = raw?.barcodeDataUrl;
+        if (barcodeDataUrl) {
+          const imgWidth = data.cell.width - 6;
+          const imgHeight = 9;
+          const xPos = data.cell.x + 3;
+          const yPos = data.cell.y + 2; // Position image at the top
+          doc.addImage(barcodeDataUrl, "PNG", xPos, yPos, imgWidth, imgHeight);
+        }
+      }
     },
   });
 
