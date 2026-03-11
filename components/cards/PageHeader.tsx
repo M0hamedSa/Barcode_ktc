@@ -27,7 +27,7 @@ export function PageHeader({
 
         <div className="min-w-0">
           <h1 className="text-[14px] font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-            Barcode Scanner
+            Add Rolls to Lay No
           </h1>
           <p className="text-[12px] text-slate-500 dark:text-slate-400">
             Scan • Review • Add • Export PDF

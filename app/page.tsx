@@ -25,7 +25,7 @@ export default function Home() {
             <ScanLine className="w-10 h-10 text-slate-800 dark:text-slate-100" />
           </div>
           <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Scanner Hub
+            KTC Scanner
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
             Select your scanning workspace
@@ -43,10 +43,10 @@ export default function Home() {
             <div className="relative flex items-center justify-between z-10">
               <div>
                 <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                  Default Scanner
+                  Add Rolls To Lay No
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Standard barcode logging
+                  اضافة اتواب لرقم فرشه
                 </p>
               </div>
               <div className="h-10 w-10 flex items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
@@ -64,10 +64,10 @@ export default function Home() {
             <div className="relative flex items-center justify-between z-10">
               <div>
                 <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">
-                  ERP Scanner
+                  Roll QC
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Advanced ERP integration
+                  تقرير فحص الأتواب
                 </p>
               </div>
               <div className="h-10 w-10 flex items-center justify-center rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/50 text-fuchsia-600 dark:text-fuchsia-400 group-hover:scale-110 transition-transform">

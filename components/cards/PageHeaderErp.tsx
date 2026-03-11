@@ -27,10 +27,10 @@ export function PageHeaderErp({
 
         <div className="min-w-0">
           <h1 className="text-[14px] font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-            ERP Scanner
+            Roll QC
           </h1>
           <p className="text-[12px] text-slate-500 dark:text-slate-400">
-            Scan • Review • Export PDF
+            Roll QC • Review • Export PDF
           </p>
         </div>
 

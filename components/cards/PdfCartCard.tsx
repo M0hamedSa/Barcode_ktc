@@ -1,15 +1,15 @@
 export function PdfCartCard({
   layNo,
   selectedCount,
-  selectedTotalQty02,
-  selectedTotalQty04,
+  selectedTotalQty,
+  selectedTotalQtyGrs,
   onExport,
   // onExportErp,
 }: {
   layNo: string;
   selectedCount: number;
-  selectedTotalQty02: number;
-  selectedTotalQty04: number;
+  selectedTotalQty: number;
+  selectedTotalQtyGrs: number;
   onExport: () => void;
   // onExportErp: () => void;
 }) {
@@ -36,10 +36,10 @@ export function PdfCartCard({
             Items: {selectedCount}
           </p>
           <p className="text-[12px] text-slate-600 dark:text-slate-400">
-            Total QTY: {selectedTotalQty02}
+            Total Net QTY: {selectedTotalQty.toFixed(2)}
           </p>
           <p className="text-[12px] text-slate-600 dark:text-slate-400">
-            Total GRS QTY: {selectedTotalQty04}
+            Total GRS QTY: {selectedTotalQtyGrs.toFixed(2)}
           </p>
         </div>
       </div>

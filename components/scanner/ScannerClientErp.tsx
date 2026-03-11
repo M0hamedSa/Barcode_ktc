@@ -54,6 +54,12 @@ export default function ScannerClient() {
         return;
       }
 
+      // Check for duplicates
+      if (history.some((e) => e.barcode === trimmed)) {
+        showToast("Barcode " + trimmed + " already added", "error");
+        return;
+      }
+
       const id = addLoadingRow(trimmed);
 
       try {
@@ -62,12 +68,16 @@ export default function ScannerClient() {
         if (res.ok && json.success) {
           const q02 = Number(json.data?.QTY_02);
           const q04 = Number(json.data?.QTY_04);
+          const q05 = Number(json.data?.QTY_05);
+          const q06 = Number(json.data?.QTY_06);
 
           patchRow(id, {
             status: "found",
             data: json.data,
             qty02: Number.isFinite(q02) ? q02 : 0,
             qty04: Number.isFinite(q04) ? q04 : 0,
+            qty05: Number.isFinite(q05) ? q05 : 0,
+            qty06: Number.isFinite(q06) ? q06 : 0,
             selected: false,
           });
           return;
@@ -86,7 +96,7 @@ export default function ScannerClient() {
         patchRow(id, { status: "error", error: "Cannot reach server" });
       }
     },
-    [addLoadingRow, patchRow, showToast],
+    [addLoadingRow, patchRow, showToast, history],
   );
 
   const { scanning, camLabel, start, stop } = useZxingScanner({

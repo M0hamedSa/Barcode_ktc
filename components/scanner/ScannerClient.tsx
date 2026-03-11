@@ -59,6 +59,12 @@ export default function ScannerClient() {
         return;
       }
 
+      // Check for duplicates
+      if (history.some((e) => e.barcode === trimmed)) {
+        showToast("Barcode " + trimmed + " already added", "error");
+        return;
+      }
+
       const id = addLoadingRow(trimmed);
 
       try {
@@ -67,12 +73,16 @@ export default function ScannerClient() {
         if (res.ok && json.success) {
           const q02 = Number(json.data?.QTY_02);
           const q04 = Number(json.data?.QTY_04);
+          const q05 = Number(json.data?.QTY_05);
+          const q06 = Number(json.data?.QTY_06);
 
           patchRow(id, {
             status: "found",
             data: json.data,
             qty02: Number.isFinite(q02) ? q02 : 0,
             qty04: Number.isFinite(q04) ? q04 : 0,
+            qty05: Number.isFinite(q05) ? q05 : 0,
+            qty06: Number.isFinite(q06) ? q06 : 0,
             selected: false,
           });
           return;
@@ -91,7 +101,7 @@ export default function ScannerClient() {
         patchRow(id, { status: "error", error: "Cannot reach server" });
       }
     },
-    [addLoadingRow, patchRow, showToast],
+    [addLoadingRow, patchRow, showToast, history],
   );
 
   const { scanning, camLabel, start, stop } = useZxingScanner({
@@ -133,13 +143,21 @@ export default function ScannerClient() {
 
   const selectedCount = selectedRows.length;
 
-  const selectedTotalQty02 = useMemo(
-    () => selectedRows.reduce((sum, e) => sum + (Number(e.qty02) || 0), 0),
+  const selectedTotalQty = useMemo(
+    () =>
+      selectedRows.reduce(
+        (sum, e) => sum + (Number(e.qty02) || 0) + (Number(e.qty04) || 0),
+        0,
+      ),
     [selectedRows],
   );
 
-  const selectedTotalQty04 = useMemo(
-    () => selectedRows.reduce((sum, e) => sum + (Number(e.qty04) || 0), 0),
+  const selectedTotalQtyGrs = useMemo(
+    () =>
+      selectedRows.reduce(
+        (sum, e) => sum + (Number(e.qty05) || 0) + (Number(e.qty06) || 0),
+        0,
+      ),
     [selectedRows],
   );
 
@@ -208,6 +226,8 @@ export default function ScannerClient() {
           data: r,
           qty02: Number(r.QTY_02) || 0,
           qty04: Number(r.QTY_04) || 0,
+          qty05: Number(r.QTY_05) || 0,
+          qty06: Number(r.QTY_06) || 0,
           selected: true,
           locked: true, // 🔒 cannot remove
         }));
@@ -240,25 +260,6 @@ export default function ScannerClient() {
     }
   }, [showToast]);
 
-  // const exportErpPdf = async () => {
-  //   const barcodes = history.map((r) => r.barcode);
-
-  //   const res = await fetch("/api/erp-rolls", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({ barcodes }),
-  //   });
-
-  //   const json = await res.json();
-  //   console.log(json);
-
-  //   const { exportErpPdf } = await import("@/components/utils/erpdf");
-
-  //   await exportErpPdf(json.rows);
-  // };
-
   return (
     <>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative">
@@ -289,10 +290,9 @@ export default function ScannerClient() {
           <PdfCartCard
             layNo={layNo}
             selectedCount={selectedCount}
-            selectedTotalQty02={selectedTotalQty02}
-            selectedTotalQty04={selectedTotalQty04}
+            selectedTotalQty={selectedTotalQty}
+            selectedTotalQtyGrs={selectedTotalQtyGrs}
             onExport={exportPdf}
-            // onExportErp={exportErpPdf}
           />
 
           <ManualEntryCard

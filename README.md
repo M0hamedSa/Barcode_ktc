@@ -1,265 +1,139 @@
-# Barcode Scanner Web App
+# KTC Scanner Hub 🚀
 
-A modern **Next.js barcode scanning application** designed for warehouse and production environments.
+A premium, modern **Next.js 15 barcode scanning ecosystem** designed for high-performance production, warehouse management, and Quality Control (QC) environments.
 
-The system scans roll barcodes, retrieves data from **Microsoft SQL Server**, allows operators to build a **Lay report**, and exports a **professional PDF report**.
+The system provides two distinct specialized workspaces:
 
----
-
-# Features
-
-## Barcode Scanning
-
-- Real-time camera barcode scanning using **ZXing**
-- Manual barcode entry supported
-- Duplicate scans are automatically prevented
-
-## Database Integration
-
-- Connects to **Microsoft SQL Server**
-- Retrieves roll information from database
-- Loads existing rolls for a Lay automatically
-
-## Lay No Workflow
-
-When a user enters a **Lay No**:
-
-1. Existing rolls with the same Lay No are retrieved from the database
-2. They appear in the result list
-3. These rolls are **locked** and cannot be removed
-4. Operators can **scan additional rolls** normally
-
-This ensures previously saved rolls remain part of the report.
+1.  **Add Rolls to Lay No**: For tracking production batches and building lay reports.
+2.  **Roll QC (Premium)**: A detailed inspection module with RTL PDF generation and Arabic status mapping.
 
 ---
 
-# Roll Selection Logic
+## ✨ Key Features
 
-| Type                  | Behavior                   |
-| --------------------- | -------------------------- |
-| Existing roll from DB | Locked (cannot be removed) |
-| New scanned roll      | Can be added/removed       |
-| Duplicate scan        | Automatically ignored      |
+### 📸 Advanced Barcode Scanning
+
+- **Real-time Camera Scan**: Powered by **ZXing** for rapid, accurate detection.
+- **Manual Entry**: Fallback for damaged labels with instant database validation.
+- **Duplicate Prevention**: Integrated logic to ensure each roll is added only once per session.
+- **Smart Loading**: Automatically retrieves and locks existing rolls when a Lay No is entered.
+
+### 🧪 Roll QC (ERP Module)
+
+- **RTL Deep Support**: Fully localized PDF reports with Right-to-Left layout.
+- **Arabic Status Mapping**: Automatically converts ERP status codes (e.g., `01`, `04`) into readable Arabic descriptions (e.g., `جديد`, `مقبول`).
+- **Visual Barcodes**: Generates high-resolution graphical barcodes within the PDF for easy rescanning.
+- **Defect Tracking**: Comprehensive grids for both Knitting (KNT) and Dyeing (DYE) defect codes.
+
+### 📊 Intelligent Weight Calculations
+
+The system implements specialized summation logic for precise reporting:
+
+- **Net Weight (QTY)**: Automatically sums `QTY_02` + `QTY_04`.
+- **Gross Weight (QTY GRS)**: Automatically sums `QTY_05` + `QTY_06`.
+- **Live Totals**: Real-time calculation of totals in the UI "PDF Cart" before export.
+
+### 🎨 Premium UI/UX
+
+- **Glassmorphism Design**: Sleek, translucent cards with glowing background accents.
+- **Full Dark Mode**: Seamlessly switches between light and dark themes via `next-themes`.
+- **Micro-animations**: Interactive hover effects and smooth transitions for a premium feel.
+- **Responsive Layout**: Optimized for mobile industrial scanners and desktop terminals alike.
 
 ---
 
-# Result Cards
+## 🛠 Tech Stack
 
-Each scanned roll shows:
-
-- Barcode
-- WO Number
-- JO Number
-- QTY_02
-- QTY_04
-- Additional roll details
-
-Result cards include:
-
-- Expand / Collapse animation
-- Copy barcode button
-- Add / Remove button
-- Locked indicator for existing rolls
+| Tier            | Technologies                                               |
+| :-------------- | :--------------------------------------------------------- |
+| **Frontend**    | Next.js 15 (App Router), React 19, Tailwind CSS v4         |
+| **State/Theme** | `next-themes`, Lucide React, Framer Motion (Glassmorphism) |
+| **Scanning**    | `@zxing/library`                                           |
+| **Database**    | **MSSQL** (Microsoft SQL Server) with Connection Pooling   |
+| **Reporting**   | `jsPDF`, `jspdf-autotable`, `jsbarcode`                    |
 
 ---
 
-# PDF Report
-
-The system generates a professional **Lay Report PDF** containing:
-
-- Company logo
-- Lay Number
-- Date & Time
-- Barcode table
-- QTY_02 per roll
-- QTY_04 per roll
-
-### Totals included
-
-- Total Rolls
-- Total QTY_02
-- Total QTY_04
-
-Example layout:
+## 📂 Project Architecture
 
 ```
-[Company Logo]
-
-Barcode Scan Report
-Lay No: 1450
-Date: 2026-03-07
-
----------------------------------------------
-| Barcode | WO | JO | QTY_02 | QTY_04 |
----------------------------------------------
-| ...                                   |
-| ...                                   |
----------------------------------------------
-
-Total Rolls : 25
-Total QTY_02: 850
-Total QTY_04: 960
-```
-
----
-
-# Saving Lay No to Database
-
-When exporting the PDF:
-
-1. Selected rolls are collected
-2. API `/api/save-lay` is called
-3. Database updates:
-
-```
-act_trn_05.ACT_KEY_01 = Lay No
-WHERE ROLL_BARCODE IN (...)
-```
-
-Only **newly added rolls** are updated.
-
----
-
-# Tech Stack
-
-| Technology      | Purpose               |
-| --------------- | --------------------- |
-| Next.js 15      | Frontend + API routes |
-| React           | UI components         |
-| Tailwind CSS    | Styling               |
-| ZXing           | Barcode scanning      |
-| MSSQL           | Database              |
-| jsPDF           | PDF generation        |
-| jspdf-autotable | Table rendering       |
-
----
-
-# Project Structure
-
-```
-src
+Barcode_ktc-main
  ├ app
- │  └ api
- │     ├ lookup
- │     ├ save-lay
- │     └ lay-lookup
+ │  ├ (pages)
+ │  │  ├ def/             # Add Rolls to Lay No Scanner
+ │  │  └ erp/             # Roll QC (ERP) Scanner
+ │  ├ api/
+ │  │  ├ lookup/          # Single barcode validation
+ │  │  ├ save-lay/        # Batch Lay No updates
+ │  │  ├ lay-lookup/      # Retrieving existing Lay rolls
+ │  │  └ erp-rolls/       # Batch data for QC reports
+ │  └ layout.tsx          # Global SEO, Themes, and Font Config
  │
  ├ components
- │  └ scanner
- │     ├ cards
- │     │   ├ CameraCard.tsx
- │     │   ├ LayNoCard.tsx
- │     │   ├ PdfCartCard.tsx
- │     │   └ PageHeader.tsx
- │     │
- │     ├ results
- │     │   ├ ResultCard.tsx
- │     │   └ ResultsSection.tsx
- │     │
- │     ├ hooks
- │     │   ├ useToast.ts
- │     │   └ useZxingScanner.ts
- │     │
- │     ├ utils
- │     │   ├ api.ts
- │     │   └ pdf.ts
- │     │
- │     └ types.ts
+ │  ├ scanner/            # Core scanner logic & hooks
+ │  ├ cards/              # Premium UI components (Headers, Cart, Manual)
+ │  ├ results/            # Specialized result cards (Standard & ERP)
+ │  └ utils/              # PDF & ERP-PDF generation logic
  │
- └ lib
-    └ db.ts
+ ├ lib/
+ │  └ db.ts               # Parameterized SQL queries & Pooling
+ └ public/
+    ├ fonts/              # Amiri Arabic font support
+    └ logo.png            # Brand assets
 ```
 
 ---
 
-# Environment Variables
+## ⚙️ Environment Configuration
 
-Create `.env.local`
+Create a `.env` file in the root directory:
 
-```
-DB_USER=
-DB_PASSWORD=
-DB_SERVER=
-DB_DATABASE=
+```env
+# Database Credentials
+DB_USER="your_user"
+DB_PASSWORD="your_password"
+DB_SERVER="your_server_ip"
+DB_DATABASE="your_database_name"
 DB_PORT=1433
 
-DB_TABLE=act_trn_05
-DB_BARCODE_COLUMN=ROLL_BARCODE
-
-DB_COLUMNS=WO_NO,JO_NO,ACT_DATA_08,ACT_DATA_09,ACT_DATA_07,QTY_02,QTY_04
+# Dynamic Table Configuration
+DB_TABLE="act_trn_05"
+DB_BARCODE_COLUMN="roll_barcode"
+DB_COLUMNS="WO_NO,JO_NO,QTY_02,QTY_04,QTY_05,QTY_06"
 ```
 
 ---
 
-# Running the Project
+## 🚀 Getting Started
 
-Install dependencies
-
-```
-npm install
-```
-
-Run development server
-
-```
-npm run dev
-```
-
-Open
-
-```
-http://localhost:3000
-```
+1.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
+2.  **Development Mode**:
+    ```bash
+    npm run dev
+    ```
+3.  **Build for Production**:
+    ```bash
+    npm run build
+    npm start
+    ```
 
 ---
 
-# Deployment
+## 📖 Operational Workflow
 
-Recommended deployment:
-
-**Vercel**
-
-Steps:
-
-1. Push repository to GitHub
-2. Import project in Vercel
-3. Add environment variables
-4. Deploy
+1.  **Select Workspace**: Choose between "Add Rolls to Lay No" or "Roll QC" from the landing page.
+2.  **Identification**: Enter a **Lay No** or scan your first roll.
+3.  **Validation**: Review roll details on the interactive cards.
+4.  **Action**:
+    - In **Lay No**: Hit **Add** to queue for the batch.
+    - In **Roll QC**: View defects and hit **Export** for a detailed individual report.
+5.  **Finalize**: Export the report; the system automatically updates the database in the background.
 
 ---
 
-# Recommended Workflow for Operators
+### 🏛 Developed by KTC Production Systems
 
-1. Enter **Lay No**
-2. System loads existing rolls
-3. Scan new rolls
-4. Press **Add** on valid rolls
-5. Click **Export PDF**
-6. Lay report is generated and database updated
-
----
-
-# Security Notes
-
-- SQL queries use **parameterized inputs**
-- Duplicate barcode scanning is prevented
-- Existing Lay rolls are **locked**
-
----
-
-# Future Improvements
-
-Potential upgrades:
-
-- Duplicate barcode detection warning
-- Multi-page PDF with page numbers
-- Landscape PDF layout
-- Scan history export
-- Barcode validation rules
-- Operator login system
-
----
-
-# Author
-
-Developed for **production roll tracking and lay reporting systems**.
+_Optimized for reliability, speed, and professional documentation._

@@ -19,7 +19,6 @@ const config: sql.config = {
 
 // Reuse connection pool across requests in dev (hot reload safe)
 declare global {
-  // eslint-disable-next-line no-var
   var _mssqlPool: sql.ConnectionPool | undefined;
 }
 
@@ -64,18 +63,19 @@ export async function queryByBarcode(
     .request()
     .input("barcode", sql.VarChar(255), barcode)
     .query(
-      `SELECT TOP 1 ${columns}${qtySelect}
-       FROM [${table}]
-       WHERE [${barcodeCol}] = @barcode`,
+      `SELECT ${columns}${qtySelect}
+      FROM [${table}]
+      WHERE ACT_CODE = 'ACT_514' AND [${barcodeCol}] = @barcode`,
     );
 
   const row = result.recordset[0];
   if (!row) return null;
 
-  const qtyRaw = Number((row as any).__qty);
+  const rowData = row as Record<string, unknown>;
+  const qtyRaw = Number(rowData.__qty);
   const qty = Number.isFinite(qtyRaw) ? qtyRaw : 1;
 
-  delete (row as any).__qty;
+  delete rowData.__qty;
 
   return { data: row, qty };
 }
@@ -126,11 +126,13 @@ export async function getRollsByLayNo(layNo: string) {
         JO_NO,
         QTY_02,
         QTY_04,
+        QTY_05,
+        QTY_06,
         ACT_DATA_08,
         ACT_DATA_09,
         ACT_DATA_07
       FROM act_trn_05
-      WHERE LAY_NO = @layNo
+      WHERE LAY_NO = @layNo AND ACT_CODE = 'ACT_514'
     `);
 
   return result.recordset;
@@ -143,7 +145,8 @@ export async function getErpRolls(barcode: string[]) {
   const result = await pool
     .request()
     .input("barcodesJson", sql.NVarChar(sql.MAX), json).query(`
-SELECT WO_NO,JO_NO,        
+SELECT 
+      WO_NO, JO_NO, COLOR_CODE, COLOR_DESC, DYE_DOC_STATUS, KNT_DOC_STATUS,      
       ROLL_BARCODE, DEFECT_01, DEFECT_02, DEFECT_03, DEFECT_04, DEFECT_05, DEFECT_06, DEFECT_07, DEFECT_08, DEFECT_09, DEFECT_10, DEFECT_11, DEFECT_12, DEFECT_13, DEFECT_14, DEFECT_15, 
       DEFECT_16, DEFECT_17, DEFECT_18, DEFECT_19, DEFECT_20, DYE_DEFECT_01, DYE_DEFECT_02, DYE_DEFECT_03, DYE_DEFECT_04, DYE_DEFECT_05, DYE_DEFECT_06, DYE_DEFECT_07, DYE_DEFECT_08, 
       DYE_DEFECT_09, DYE_DEFECT_10, DYE_DEFECT_11, DYE_DEFECT_12, DYE_DEFECT_13, DYE_DEFECT_14, DYE_DEFECT_15, DYE_DEFECT_16, DYE_DEFECT_17, DYE_DEFECT_18, DYE_DEFECT_19, DYE_DEFECT_20, 

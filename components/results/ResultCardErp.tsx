@@ -5,10 +5,9 @@ import { keyDescriptions } from "../scanner/config";
 
 export function ResultCardErp({
   entry,
-  onToggleSelected,
 }: {
   entry: ScanEntry;
-  onToggleSelected: (id: number) => void;
+  onToggleSelected?: (id: number) => void;
 }) {
   const copyCode = () => navigator.clipboard.writeText(entry.barcode);
 
@@ -20,7 +19,10 @@ export function ResultCardErp({
   const [maxH, setMaxH] = useState<number>(0);
 
   // Optional: hide some keys from details because you already show them in badges
-  const hiddenKeys = useMemo(() => new Set(["QTY_02", "QTY_04"]), []);
+  const hiddenKeys = useMemo(
+    () => new Set(["QTY_02", "QTY_04", "QTY_05", "QTY_06"]),
+    [],
+  );
 
   // If entry changes (new scan), keep it expanded or collapsed as you like
   // Recalc height when expanded or content changes
@@ -33,7 +35,14 @@ export function ResultCardErp({
     } else {
       setMaxH(0);
     }
-  }, [expanded, entry.data, entry.qty02, entry.qty04]);
+  }, [
+    expanded,
+    entry.data,
+    entry.qty02,
+    entry.qty04,
+    entry.qty05,
+    entry.qty06,
+  ]);
 
   const exportErpPdf = async (barcode: string) => {
     const res = await fetch("/api/erp-rolls", {
@@ -120,7 +129,6 @@ export function ResultCardErp({
   }
 
   // ✅ FOUND card (with collapsible details)
-  const selected = !!entry.selected;
 
   const dataEntries = Object.entries(entry.data || {}).filter(
     ([k]) => !hiddenKeys.has(k),
@@ -132,8 +140,12 @@ export function ResultCardErp({
       <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-linear-to-b from-slate-50 dark:from-slate-800/50 to-white dark:to-slate-900">
         <div className="flex items-center gap-2 flex-wrap">
           <Badge tone="emerald">Found</Badge>
-          <Badge tone="slate">QTY : {entry.qty02 ?? "—"}</Badge>
-          <Badge tone="slate">QTY GRS : {entry.qty04 ?? "—"}</Badge>
+          <Badge tone="slate">
+            QTY : {((entry.qty02 ?? 0) + (entry.qty04 ?? 0)).toFixed(2)}
+          </Badge>
+          <Badge tone="slate">
+            QTY GRS : {((entry.qty05 ?? 0) + (entry.qty06 ?? 0)).toFixed(2)}
+          </Badge>
           <span className="ml-auto text-[11px] text-slate-500 dark:text-slate-400">
             {entry.time}
           </span>

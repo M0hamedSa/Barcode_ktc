@@ -7,8 +7,10 @@ export interface ScanEntry {
   time: string;
   status: ScanStatus;
   data?: Record<string, unknown>;
-  qty02?: number; // ✅ NEW
-  qty04?: number; // ✅ NEW
+  qty02?: number;
+  qty04?: number;
+  qty05?: number;
+  qty06?: number;
   selected?: boolean;
   error?: string;
   locked?: boolean;
