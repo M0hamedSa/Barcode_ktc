@@ -12,7 +12,6 @@ import { PageHeaderErp } from "../cards/PageHeaderErp";
 import { CameraCard } from "../cards/CameraCard";
 import { ManualEntryCard } from "../cards/ManualEntryCard";
 import { ResultsSectionErp } from "../results/ResultsSectionErp";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function ScannerClient() {
   const [zxingReady, setZxingReady] = useState(false);
@@ -132,13 +131,10 @@ export default function ScannerClient() {
 
   return (
     <>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative overflow-hidden">
-        {/* Subtle background decoration */}
-        <div className="absolute top-[-10%] right-[-10%] w-160 h-160 rounded-full bg-fuchsia-500/20 dark:bg-fuchsia-500/10 blur-[120px] pointer-events-none" />
-
-        {/* Theme Toggle Top Right */}
-        <div className="absolute top-3 right-4 z-50">
-          <ThemeToggle />
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative">
+        {/* Subtle background decoration - wrapped to prevent body overflow */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] right-[-10%] w-160 h-160 rounded-full bg-fuchsia-500/20 dark:bg-fuchsia-500/10 blur-[120px]" />
         </div>
 
         <PageHeaderErp scanning={scanning} zxingReady={zxingReady} />

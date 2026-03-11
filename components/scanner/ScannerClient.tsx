@@ -16,7 +16,6 @@ import { CameraCard } from "../cards/CameraCard";
 import { PdfCartCard } from "../cards/PdfCartCard";
 import { ManualEntryCard } from "../cards/ManualEntryCard";
 import { ResultsSection } from "../results/ResultsSection";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function ScannerClient() {
   const [zxingReady, setZxingReady] = useState(false);
@@ -194,16 +193,28 @@ export default function ScannerClient() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ Lay_No: lay }),
+          body: JSON.stringify({ layNo: lay }),
         });
         const json = await res.json();
-        if (!res.ok) {
-          showToast(json.error || "Lookup failed", "error");
-          return;
-        }
-        setHistory(json.results || []);
+
+        if (!res.ok || !json.success) return;
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rows = json.rows.map((r: any) => ({
+          id: Math.random(),
+          barcode: r.ROLL_BARCODE,
+          time: "Existing",
+          status: "found",
+          data: r,
+          qty02: Number(r.QTY_02) || 0,
+          qty04: Number(r.QTY_04) || 0,
+          selected: true,
+          locked: true, // 🔒 cannot remove
+        }));
+
+        setHistory(rows);
       } catch {
-        showToast("Cannot reach server for lookup", "error");
+        showToast("Cannot load Lay No data", "error");
       }
     },
     [showToast],
@@ -251,12 +262,9 @@ export default function ScannerClient() {
   return (
     <>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative">
-        {/* Emerald accent background decorations */}
-        <div className="absolute top-[-10%] left-[-10%] w-160 h-160 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 blur-[120px] pointer-events-none" />
-
-        {/* Theme Toggle Top Right */}
-        <div className="absolute top-3 right-4 z-50">
-          <ThemeToggle />
+        {/* Emerald accent background decorations - wrapped to prevent body overflow */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-160 h-160 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 blur-[120px]" />
         </div>
 
         <PageHeader scanning={scanning} zxingReady={zxingReady} />

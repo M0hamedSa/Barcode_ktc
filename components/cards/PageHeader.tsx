@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Badge } from "../ui/Badge";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function PageHeader({
   scanning,
@@ -33,7 +34,7 @@ export function PageHeader({
           </p>
         </div>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
           {!zxingReady ? (
             <Badge tone="slate">Loading…</Badge>
           ) : scanning ? (
@@ -41,6 +42,7 @@ export function PageHeader({
           ) : (
             <Badge tone="slate">Idle</Badge>
           )}
+          <ThemeToggle />
         </div>
       </div>
     </header>
