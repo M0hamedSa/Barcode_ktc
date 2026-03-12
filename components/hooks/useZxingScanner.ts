@@ -39,7 +39,7 @@ export function useZxingScanner({
       codeReaderRef.current = codeReader;
 
       // 1. Get all video devices
-      const videoDevices = await codeReader.listVideoInputDevices();
+      const videoDevices = await (codeReader as any).listVideoInputDevices();
       if (!videoDevices || videoDevices.length === 0) {
         throw new Error("No cameras found");
       }
