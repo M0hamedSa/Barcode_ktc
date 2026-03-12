@@ -46,9 +46,12 @@ export async function exportScanPdf({
   doc.setFontSize(18);
   doc.text("Barcode Scan Report", margin, 32);
 
-  doc.setFontSize(11);
-  doc.text(`Lay No: ${layNo}`, margin, 40);
-  doc.text(`Date: ${new Date().toLocaleString()}`, margin, 46);
+  const pageWidth = doc.internal.pageSize.getWidth();
+  doc.setFontSize(24);
+  doc.text(`LAY NO: ${layNo}`, pageWidth / 2, 45, { align: "center" });
+
+  doc.setFontSize(10);
+  doc.text(`Date: ${new Date().toLocaleString()}`, margin, 45);
 
   const JsBarcode = (await import("jsbarcode")).default;
 
@@ -62,6 +65,7 @@ export async function exportScanPdf({
         displayValue: false,
         height: 20,
         margin: 0,
+        width: 1,
       });
       barcodeDataUrl = canvas.toDataURL("image/png");
     }
@@ -70,15 +74,16 @@ export async function exportScanPdf({
       { content: String(e.barcode ?? ""), barcodeDataUrl }, // Column 0: Includes text for autoTable to render
       String(e.data?.WO_NO ?? ""),
       String(e.data?.JO_NO ?? ""),
-      ((Number(e.qty02) || 0) + (Number(e.qty04) || 0)).toFixed(2),
+      String(e.data?.ACT_DATA_08 ?? ""),
       ((Number(e.qty05) || 0) + (Number(e.qty06) || 0)).toFixed(2),
+      ((Number(e.qty02) || 0) + (Number(e.qty04) || 0)).toFixed(2),
       String(e.barcode ?? ""), // Column 5: Barcode Text (Hidden)
     ];
   });
 
   autoTable(doc, {
-    startY: 52,
-    head: [["Barcode", "WO No", "JO No", "QTY (Net)", "QTY (GRS)"]],
+    startY: 60,
+    head: [["Barcode", "WO No", "JO No", "Color", "QTY (Net)", "QTY (GRS)"]],
     body,
     theme: "grid",
     styles: {
@@ -86,25 +91,28 @@ export async function exportScanPdf({
       cellPadding: 1,
       font: "Amiri",
       minCellHeight: 16,
-      valign: "bottom",
+      valign: "middle",
       halign: "center",
     },
     headStyles: {
-      fillColor: [30, 41, 59],
+      fillColor: [146, 147, 152],
       textColor: 255,
       font: "Amiri",
       halign: "center",
+      valign: "middle",
+      minCellHeight: 10,
     },
     alternateRowStyles: {
       fillColor: [248, 250, 252],
     },
     margin: { left: margin, right: margin },
     columnStyles: {
-      0: { cellWidth: 50 },
-      1: { cellWidth: 38 },
-      2: { cellWidth: 38 },
-      3: { cellWidth: 25 },
-      4: { cellWidth: 25 },
+      0: { cellWidth: 30, valign: "middle" },
+      1: { cellWidth: 38, valign: "middle" },
+      2: { cellWidth: 38, valign: "middle" },
+      3: { cellWidth: 25, valign: "middle" },
+      4: { cellWidth: 25, valign: "middle" },
+      5: { cellWidth: 25, valign: "middle" },
     },
     didDrawCell: (data) => {
       if (data.section === "body" && data.column.index === 0) {
@@ -125,12 +133,12 @@ export async function exportScanPdf({
   const totalRolls = rows.length;
 
   const totalQty = rows.reduce(
-    (sum, r) => sum + (Number(r.qty02) || 0) + (Number(r.qty04) || 0),
+    (sum, r) => sum + (Number(r.qty05) || 0) + (Number(r.qty06) || 0),
     0,
   );
 
   const totalQtyGrs = rows.reduce(
-    (sum, r) => sum + (Number(r.qty05) || 0) + (Number(r.qty06) || 0),
+    (sum, r) => sum + (Number(r.qty02) || 0) + (Number(r.qty04) || 0),
     0,
   );
 

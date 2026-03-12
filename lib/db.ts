@@ -117,20 +117,21 @@ export async function saveLayNoForRollBarcodes(
 
 export async function getRollsByLayNo(layNo: string) {
   const pool = await getPool();
+  const columnsEnv =
+    process.env.DB_COLUMNS_QC ||
+    "ROLL_BARCODE,WO_NO,JO_NO,QTY_02,QTY_04,QTY_05,QTY_06,ACT_DATA_08,ACT_DATA_09,ACT_DATA_07";
+
+  // Ensure mandatory columns for logic are present
+  const mandatory = ["ROLL_BARCODE", "QTY_02", "QTY_04", "QTY_05", "QTY_06"];
+  const provided = columnsEnv.split(",").map((c) => c.trim());
+  const finalColumns = Array.from(new Set([...mandatory, ...provided]));
+
+  const columns = finalColumns.map((c) => `[${c}]`).join(", ");
 
   const result = await pool.request().input("layNo", sql.VarChar(50), layNo)
     .query(`
       SELECT
-        ROLL_BARCODE,
-        WO_NO,
-        JO_NO,
-        QTY_02,
-        QTY_04,
-        QTY_05,
-        QTY_06,
-        ACT_DATA_08,
-        ACT_DATA_09,
-        ACT_DATA_07
+        ${columns}
       FROM act_trn_05
       WHERE LAY_NO = @layNo AND ACT_CODE = 'ACT_514'
     `);
@@ -146,13 +147,15 @@ export async function getErpRolls(barcode: string[]) {
     .request()
     .input("barcodesJson", sql.NVarChar(sql.MAX), json).query(`
 SELECT 
-      WO_NO, JO_NO, COLOR_CODE, COLOR_DESC, DYE_DOC_STATUS, KNT_DOC_STATUS, ROll_WEIGHT,    
-      ROLL_BARCODE, DEFECT_01, DEFECT_02, DEFECT_03, DEFECT_04, DEFECT_05, DEFECT_06, DEFECT_07, DEFECT_08, DEFECT_09, DEFECT_10, DEFECT_11, DEFECT_12, DEFECT_13, DEFECT_14, DEFECT_15, 
-      DEFECT_16, DEFECT_17, DEFECT_18, DEFECT_19, DEFECT_20, DYE_DEFECT_01, DYE_DEFECT_02, DYE_DEFECT_03, DYE_DEFECT_04, DYE_DEFECT_05, DYE_DEFECT_06, DYE_DEFECT_07, DYE_DEFECT_08, 
-      DYE_DEFECT_09, DYE_DEFECT_10, DYE_DEFECT_11, DYE_DEFECT_12, DYE_DEFECT_13, DYE_DEFECT_14, DYE_DEFECT_15, DYE_DEFECT_16, DYE_DEFECT_17, DYE_DEFECT_18, DYE_DEFECT_19, DYE_DEFECT_20, 
-      DYE_DEFECT_21, DYE_DEFECT_22, DYE_DEFECT_23, DYE_DEFECT_24
-      FROM ERP_ROLL_DATA
-      WHERE ROLL_BARCODE IN (
+      E.WO_NO, E.JO_NO, T.ACT_DATA_13 AS COLOR_CODE, E.COLOR_DESC, E.DYE_DOC_STATUS, E.KNT_DOC_STATUS, E.ROll_WEIGHT,    
+      E.ROLL_BARCODE, E.DEFECT_01, E.DEFECT_02, E.DEFECT_03, E.DEFECT_04, E.DEFECT_05, E.DEFECT_06, E.DEFECT_07, E.DEFECT_08, E.DEFECT_09, E.DEFECT_10, E.DEFECT_11, E.DEFECT_12, E.DEFECT_13, E.DEFECT_14, E.DEFECT_15, 
+      E.DEFECT_16, E.DEFECT_17, E.DEFECT_18, E.DEFECT_19, E.DEFECT_20, E.DYE_DEFECT_01, E.DYE_DEFECT_02, E.DYE_DEFECT_03, E.DYE_DEFECT_04, E.DYE_DEFECT_05, E.DYE_DEFECT_06, E.DYE_DEFECT_07, E.DYE_DEFECT_08, 
+      E.DYE_DEFECT_09, E.DYE_DEFECT_10, E.DYE_DEFECT_11, E.DYE_DEFECT_12, E.DYE_DEFECT_13, E.DYE_DEFECT_14, E.DYE_DEFECT_15, E.DYE_DEFECT_16, E.DYE_DEFECT_17, E.DYE_DEFECT_18, E.DYE_DEFECT_19, E.DYE_DEFECT_20, 
+      E.DYE_DEFECT_21, E.DYE_DEFECT_22, E.DYE_DEFECT_23, E.DYE_DEFECT_24,
+      T.QTY_05, T.QTY_06
+      FROM ERP_ROLL_DATA E
+      LEFT JOIN act_trn_05 T ON E.ROLL_BARCODE = T.roll_barcode AND E.WO_NO = T.WO_NO AND E.JO_NO = T.JO_NO AND T.ACT_CODE = 'ACT_514'
+      WHERE E.ROLL_BARCODE IN (
         SELECT value FROM OPENJSON(@barcodesJson)
       )
     `);

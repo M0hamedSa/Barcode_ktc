@@ -165,9 +165,11 @@ export async function exportErpPdf(rows: Record<string, any>[]) {
   doc.text("كود اللون", labelCol2, 41, { align: "right" });
   doc.text(String(row.COLOR_CODE ?? ""), valCol2, 41, { align: "right" });
 
-  doc.text("الوزن", labelCol3, 41, { align: "right" });
-
-  doc.text(String(row.ROll_WEIGHT ?? ""), valCol3, 41, { align: "right" });
+  doc.text("الوزن الصافي", labelCol3, 41, { align: "right" });
+  const weightVal = (Number(row.QTY_05 || 0) + Number(row.QTY_06 || 0)).toFixed(
+    2,
+  );
+  doc.text(String(weightVal), valCol3, 41, { align: "right" });
 
   // ── KNT Table ──
   doc.setFontSize(11);
@@ -197,6 +199,7 @@ export async function exportErpPdf(rows: Record<string, any>[]) {
       font: "Amiri",
       fontStyle: "normal",
       halign: "right",
+      valign: "middle",
       fontSize: 9.5,
     },
     columnStyles: {
@@ -236,6 +239,7 @@ export async function exportErpPdf(rows: Record<string, any>[]) {
       font: "Amiri",
       fontStyle: "normal",
       halign: "right",
+      valign: "middle",
       fontSize: 9.5,
     },
     columnStyles: {

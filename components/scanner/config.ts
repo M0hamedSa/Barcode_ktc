@@ -7,6 +7,10 @@ export const keyDescriptions: Record<string, string> = {
   ACT_DATA_08: "اللون",
   ACT_DATA_09: "المقاس",
   ACT_DATA_07: "الاستايل",
+  QTY_02: "الوزن القائم (2)",
+  QTY_04: "الوزن القائم (4)",
+  QTY_05: "الوزن الصافي (5)",
+  QTY_06: "الوزن الصافي (6)",
 };
 
 export const DEFECT_LABELS: Record<string, string> = {

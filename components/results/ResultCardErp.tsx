@@ -150,10 +150,10 @@ export function ResultCardErp({
         <div className="flex items-center gap-2 flex-wrap">
           <Badge tone="emerald">Found</Badge>
           <Badge tone="slate">
-            QTY : {((entry.qty02 ?? 0) + (entry.qty04 ?? 0)).toFixed(2)}
+            QTY NET : {((entry.qty05 ?? 0) + (entry.qty06 ?? 0)).toFixed(2)}
           </Badge>
           <Badge tone="slate">
-            QTY GRS : {((entry.qty05 ?? 0) + (entry.qty06 ?? 0)).toFixed(2)}
+            QTY GRS : {((entry.qty02 ?? 0) + (entry.qty04 ?? 0)).toFixed(2)}
           </Badge>
           <span className="ml-auto text-[11px] text-slate-500 dark:text-slate-400">
             {entry.time}

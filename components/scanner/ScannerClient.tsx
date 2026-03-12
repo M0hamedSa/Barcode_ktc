@@ -152,7 +152,7 @@ export default function ScannerClient() {
   const selectedTotalQty = useMemo(
     () =>
       selectedRows.reduce(
-        (sum, e) => sum + (Number(e.qty02) || 0) + (Number(e.qty04) || 0),
+        (sum, e) => sum + (Number(e.qty05) || 0) + (Number(e.qty06) || 0),
         0,
       ),
     [selectedRows],
@@ -161,7 +161,7 @@ export default function ScannerClient() {
   const selectedTotalQtyGrs = useMemo(
     () =>
       selectedRows.reduce(
-        (sum, e) => sum + (Number(e.qty05) || 0) + (Number(e.qty06) || 0),
+        (sum, e) => sum + (Number(e.qty02) || 0) + (Number(e.qty04) || 0),
         0,
       ),
     [selectedRows],
