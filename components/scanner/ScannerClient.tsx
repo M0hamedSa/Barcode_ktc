@@ -27,7 +27,13 @@ export default function ScannerClient() {
   const [isExporting, setIsExporting] = useState(false);
   const beepRef = useRef<HTMLAudioElement | null>(null);
   const entryIdRef = useRef(0);
+  const historyRef = useRef<ScanEntry[]>([]); // ✅ Ref for real-time checks
   const { toast, showToast } = useToast();
+
+  // Keep ref in sync
+  useEffect(() => {
+    historyRef.current = history;
+  }, [history]);
 
   useEffect(() => {
     const audio = new Audio("/beep.mp3");
@@ -62,8 +68,8 @@ export default function ScannerClient() {
         return;
       }
 
-      // Check for duplicates
-      if (history.some((e) => e.barcode === trimmed)) {
+      // Check for duplicates using Ref (more reliable for rapid scans)
+      if (historyRef.current.some((e) => e.barcode === trimmed)) {
         showToast("Barcode " + trimmed + " already added", "error");
         return;
       }
@@ -107,7 +113,7 @@ export default function ScannerClient() {
         setIsSearching(false);
       }
     },
-    [addLoadingRow, patchRow, showToast, history],
+    [addLoadingRow, patchRow, showToast], // ✅ Removed history (using historyRef instead)
   );
 
   const { scanning, camLabel, start, stop } = useZxingScanner({

@@ -19,44 +19,105 @@ export function useZxingScanner({
   const cooldownRef = useRef(false);
   const lastScannedRef = useRef<string | null>(null);
 
+  // ✅ Use refs to handle stale closures for callbacks
+  const scanCallbackRef = useRef(onScanText);
+  const errorCallbackRef = useRef(onError);
+
+  useEffect(() => {
+    scanCallbackRef.current = onScanText;
+  }, [onScanText]);
+
+  useEffect(() => {
+    errorCallbackRef.current = onError;
+  }, [onError]);
+
   const start = useCallback(async () => {
     if (scanning || !zxingReady) return;
 
     try {
-      codeReaderRef.current = new window.ZXing.BrowserMultiFormatReader();
+      const codeReader = new window.ZXing.BrowserMultiFormatReader();
+      codeReaderRef.current = codeReader;
+
+      // 1. Get all video devices
+      const videoDevices = await codeReader.listVideoInputDevices();
+      if (!videoDevices || videoDevices.length === 0) {
+        throw new Error("No cameras found");
+      }
+
+      // 2. Select the best back camera
+      // Heuristic: look for "back", "rear", or "environment" in label.
+      // If many, pick the last one (usually the main camera vs ultra-wide/tele).
+      const backCameras = videoDevices.filter((v: any) => {
+        const label = (v.label || "").toLowerCase();
+        return (
+          label.includes("back") ||
+          label.includes("rear") ||
+          label.includes("environment") ||
+          label.includes("facing")
+        );
+      });
+
+      const selectedId =
+        backCameras.length > 0
+          ? backCameras[backCameras.length - 1].deviceId
+          : videoDevices[videoDevices.length - 1].deviceId;
+
       setScanning(true);
       setCamLabel("SCANNING");
 
-      await codeReaderRef.current.decodeFromVideoDevice(
-        null,
+      await codeReader.decodeFromVideoDevice(selectedId, "preview", (r) => {
+        if (!r || cooldownRef.current) return;
+
+        const text = r.getText();
+        if (!text || text === lastScannedRef.current) return;
+
+        lastScannedRef.current = text;
+        cooldownRef.current = true;
+
+        setTimeout(() => {
+          cooldownRef.current = false;
+          lastScannedRef.current = null;
+        }, 2500);
+
+        setCamLabel("GOT IT");
+        playBeep();
+        scanCallbackRef.current(text); // ✅ Use latest ref callback
+        setTimeout(() => setCamLabel("SCANNING"), 1200);
+      });
+
+      // 3. Apply advanced focus constraints if supported
+      const video = document.getElementById(
         "preview",
-        (r) => {
-          if (!r || cooldownRef.current) return;
+      ) as HTMLVideoElement | null;
+      if (video?.srcObject) {
+        const track = (video.srcObject as MediaStream).getVideoTracks()[0];
+        if (track) {
+          try {
+            const capabilities = (track as any).getCapabilities?.() || {};
+            const constraints: any = {};
 
-          const text = r.getText();
-          if (!text || text === lastScannedRef.current) return;
+            if (capabilities.focusMode?.includes("continuous")) {
+              constraints.focusMode = "continuous";
+            }
+            if (capabilities.whiteBalanceMode?.includes("continuous")) {
+              constraints.whiteBalanceMode = "continuous";
+            }
 
-          lastScannedRef.current = text;
-          cooldownRef.current = true;
-
-          setTimeout(() => {
-            cooldownRef.current = false;
-            lastScannedRef.current = null;
-          }, 2500);
-
-          setCamLabel("GOT IT");
-          playBeep();
-          onScanText(text);
-          setTimeout(() => setCamLabel("SCANNING"), 1200);
-        },
-      );
+            if (Object.keys(constraints).length > 0) {
+              await track.applyConstraints({ advanced: [constraints] });
+            }
+          } catch (e) {
+            console.warn("Failed to apply advanced focus constraints", e);
+          }
+        }
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Unknown error";
-      onError(msg);
+      errorCallbackRef.current(msg); // ✅ Use latest callback
       setScanning(false);
       setCamLabel("READY");
     }
-  }, [scanning, zxingReady, onScanText, onError]);
+  }, [scanning, zxingReady]); // ✅ Removed onScanText, onError
 
   const stop = useCallback(() => {
     if (codeReaderRef.current) {
