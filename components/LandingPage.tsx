@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Box, ScanLine } from "lucide-react";
 
@@ -21,13 +22,19 @@ export default function LandingPage() {
       <div className="relative z-10 w-full max-w-md rounded-3xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl p-10 shadow-2xl transition-all duration-300">
         {/* Title Section */}
         <div className="flex flex-col items-center mb-10 text-center space-y-3">
-          <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl shadow-inner mb-2">
-            <ScanLine className="w-10 h-10 text-slate-800 dark:text-slate-100" />
+          <div className="mb-2">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={140}
+              height={140}
+              className="dark:brightness-200"
+            />
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            KTC Scanner
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            SCANNER
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
             Select your scanning workspace
           </p>
         </div>
@@ -42,10 +49,10 @@ export default function LandingPage() {
             <div className="absolute inset-0 bg-linear-to-r from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="relative flex items-center justify-between z-10">
               <div>
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                <h2 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                   Add Rolls To Lay No
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-[12px] sm:text-xs text-slate-500 dark:text-slate-400">
                   اضافة اتواب لرقم فرشه
                 </p>
               </div>
@@ -63,10 +70,10 @@ export default function LandingPage() {
             <div className="absolute inset-0 bg-linear-to-r from-fuchsia-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="relative flex items-center justify-between z-10">
               <div>
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">
+                <h2 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">
                   Roll QC
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-[12px] sm:text-xs text-slate-500 dark:text-slate-400">
                   تقرير فحص الأتواب
                 </p>
               </div>
