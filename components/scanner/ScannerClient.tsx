@@ -233,7 +233,7 @@ export default function ScannerClient() {
         if (!res.ok || !json.success) return;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const rows = json.rows.map((r: any) => ({
+        const newRows = json.rows.map((r: any) => ({
           id: Math.random(),
           barcode: r.ROLL_BARCODE,
           time: "Existing",
@@ -247,7 +247,20 @@ export default function ScannerClient() {
           locked: true, // 🔒 cannot remove
         }));
 
-        setHistory(rows);
+        setHistory((prev) => {
+          const merged = [...prev];
+          newRows.forEach((newRow: ScanEntry) => {
+            const index = merged.findIndex((e) => e.barcode === newRow.barcode);
+            if (index !== -1) {
+              // Replace existing with official data
+              merged[index] = newRow;
+            } else {
+              // Add as new at the top
+              merged.unshift(newRow);
+            }
+          });
+          return merged;
+        });
       } catch {
         showToast("Cannot load Lay No data", "error");
       } finally {
