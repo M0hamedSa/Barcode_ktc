@@ -12,6 +12,9 @@ export function useZxingScanner({
 }) {
   const [scanning, setScanning] = useState(false);
   const [camLabel, setCamLabel] = useState("READY");
+  const [torchSupported, setTorchSupported] = useState(false);
+  const [torchOn, setTorchOn] = useState(false);
+  const trackRef = useRef<MediaStreamTrack | null>(null);
   const codeReaderRef = useRef<InstanceType<
     typeof window.ZXing.BrowserMultiFormatReader
   > | null>(null);
@@ -85,16 +88,22 @@ export function useZxingScanner({
         setTimeout(() => setCamLabel("SCANNING"), 1200);
       });
 
-      // 3. Apply advanced focus constraints if supported
+      // 3. Apply advanced focus constraints and check for torch
       const video = document.getElementById(
         "preview",
       ) as HTMLVideoElement | null;
       if (video?.srcObject) {
         const track = (video.srcObject as MediaStream).getVideoTracks()[0];
         if (track) {
+          trackRef.current = track;
           try {
             const capabilities = (track as any).getCapabilities?.() || {};
             const constraints: any = {};
+
+            // Check if torch is supported
+            if ("torch" in capabilities) {
+              setTorchSupported(true);
+            }
 
             if (capabilities.focusMode?.includes("continuous")) {
               constraints.focusMode = "continuous";
@@ -119,6 +128,19 @@ export function useZxingScanner({
     }
   }, [scanning, zxingReady]); // ✅ Removed onScanText, onError
 
+  const toggleTorch = useCallback(async () => {
+    if (!trackRef.current || !torchSupported) return;
+    try {
+      const newState = !torchOn;
+      await trackRef.current.applyConstraints({
+        advanced: [{ torch: newState } as any],
+      });
+      setTorchOn(newState);
+    } catch (e) {
+      console.error("Failed to toggle torch", e);
+    }
+  }, [torchOn, torchSupported]);
+
   const stop = useCallback(() => {
     if (codeReaderRef.current) {
       codeReaderRef.current.reset();
@@ -127,6 +149,9 @@ export function useZxingScanner({
 
     setScanning(false);
     setCamLabel("READY");
+    setTorchOn(false);
+    setTorchSupported(false);
+    trackRef.current = null;
     lastScannedRef.current = null;
     cooldownRef.current = false;
 
@@ -139,5 +164,13 @@ export function useZxingScanner({
 
   useEffect(() => () => stop(), [stop]);
 
-  return { scanning, camLabel, start, stop };
+  return {
+    scanning,
+    camLabel,
+    torchOn,
+    torchSupported,
+    toggleTorch,
+    start,
+    stop,
+  };
 }

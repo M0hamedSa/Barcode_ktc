@@ -116,7 +116,15 @@ export default function ScannerClient() {
     [addLoadingRow, patchRow, showToast], // ✅ Removed history (using historyRef instead)
   );
 
-  const { scanning, camLabel, start, stop } = useZxingScanner({
+  const {
+    scanning,
+    camLabel,
+    torchOn,
+    torchSupported,
+    toggleTorch,
+    start,
+    stop,
+  } = useZxingScanner({
     zxingReady,
     onScanText: (text) => {
       if (beepRef.current) {
@@ -314,6 +322,9 @@ export default function ScannerClient() {
             zxingReady={zxingReady}
             scanning={scanning}
             camLabel={camLabel}
+            torchOn={torchOn}
+            torchSupported={torchSupported}
+            onToggleTorch={toggleTorch}
             onStart={start}
             onStop={stop}
           />

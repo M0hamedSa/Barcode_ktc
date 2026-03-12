@@ -1,15 +1,22 @@
+import { Zap } from "lucide-react";
 import { Badge } from "../ui/Badge";
 
 export function CameraCard({
   zxingReady,
   scanning,
   camLabel,
+  torchOn,
+  torchSupported,
+  onToggleTorch,
   onStart,
   onStop,
 }: {
   zxingReady: boolean;
   scanning: boolean;
   camLabel: string;
+  torchOn: boolean;
+  torchSupported: boolean;
+  onToggleTorch: () => void;
   onStart: () => void;
   onStop: () => void;
 }) {
@@ -25,6 +32,20 @@ export function CameraCard({
           </div>
 
           <div className="flex items-center gap-2">
+            {scanning && torchSupported && (
+              <button
+                type="button"
+                onClick={onToggleTorch}
+                className={`flex items-center justify-center p-2 rounded-xl transition-all active:scale-90 ${
+                  torchOn
+                    ? "bg-amber-400 text-amber-950 shadow-lg shadow-amber-400/20"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                }`}
+                title={torchOn ? "Turn Flash Off" : "Turn Flash On"}
+              >
+                <Zap size={18} fill={torchOn ? "currentColor" : "none"} />
+              </button>
+            )}
             <button
               type="button"
               onClick={onStart}
