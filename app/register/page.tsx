@@ -42,7 +42,8 @@ export default function RegisterPage() {
       }
 
       setSuccessMessage(
-        data.message || "User created successfully. Please check your email.",
+        data.message ||
+          "User created successfully. Please check your email and wait for admin approval.",
       );
       // Scroll to top to see message
       window.scrollTo({ top: 0, behavior: "smooth" });

@@ -40,6 +40,7 @@ export interface DbUser {
   password_hash: string;
   role: string;
   is_verified: boolean;
+  is_approved: boolean;
   verification_token: string | null;
   reset_token: string | null;
   reset_token_expires: Date | null;
@@ -123,9 +124,9 @@ export async function createUser(
     .input("role", sql.NVarChar(20), role)
     .input("verificationToken", sql.NVarChar(255), verificationToken)
     .query(
-      `INSERT INTO users_barcode (username, email, password_hash, role, verification_token)
+      `INSERT INTO users_barcode (username, email, password_hash, role, verification_token, is_approved)
        OUTPUT INSERTED.*
-       VALUES (@username, @email, @passwordHash, @role, @verificationToken)`,
+       VALUES (@username, @email, @passwordHash, @role, @verificationToken, 0)`,
     );
   return result.recordset[0];
 }
@@ -178,9 +179,18 @@ export async function listUsers(): Promise<Omit<DbUser, "password_hash">[]> {
   const result = await pool
     .request()
     .query(
-      "SELECT id, username, email, role, is_verified, created_at FROM users_barcode ORDER BY created_at DESC",
+      "SELECT id, username, email, role, is_verified, is_approved, created_at FROM users_barcode ORDER BY created_at DESC",
     );
   return result.recordset;
+}
+
+export async function approveUser(id: number): Promise<boolean> {
+  const pool = await getAuthPool();
+  const result = await pool
+    .request()
+    .input("id", sql.Int, id)
+    .query("UPDATE users_barcode SET is_approved = 1 WHERE id = @id");
+  return (result.rowsAffected?.[0] ?? 0) > 0;
 }
 
 export async function deleteUser(id: number): Promise<boolean> {

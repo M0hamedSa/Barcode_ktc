@@ -19,6 +19,8 @@ interface UserItem {
   id: number;
   username: string;
   role: string;
+  is_approved: boolean;
+  is_verified: boolean;
   created_at: string;
 }
 
@@ -28,6 +30,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [acting, setActing] = useState<number | null>(null);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -60,6 +63,39 @@ export default function AdminPage() {
       console.error("Failed to delete user");
     } finally {
       setDeleting(null);
+    }
+  };
+
+  const handleAction = async (userId: number, action: "approve" | "reject") => {
+    if (
+      action === "reject" &&
+      !confirm("Are you sure you want to reject and delete this user?")
+    )
+      return;
+
+    setActing(userId);
+    try {
+      const res = await fetch("/api/admin/approve-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, action }),
+      });
+
+      if (res.ok) {
+        if (action === "approve") {
+          setUsers((prev) =>
+            prev.map((u) =>
+              u.id === userId ? { ...u, is_approved: true } : u,
+            ),
+          );
+        } else {
+          setUsers((prev) => prev.filter((u) => u.id !== userId));
+        }
+      }
+    } catch {
+      console.error(`Failed to ${action} user`);
+    } finally {
+      setActing(null);
     }
   };
 
@@ -149,9 +185,21 @@ export default function AdminPage() {
                       )}
                     </div>
                     <div>
-                      <p className="font-semibold text-slate-800 dark:text-slate-200">
-                        {u.username}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-slate-800 dark:text-slate-200">
+                          {u.username}
+                        </p>
+                        {!u.is_approved && (
+                          <span className="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-[10px] font-bold text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/50 uppercase tracking-wider">
+                            Pending Approval
+                          </span>
+                        )}
+                        {!u.is_verified && (
+                          <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/50 text-[10px] font-bold text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 uppercase tracking-wider">
+                            Unverified
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-slate-400">
                         {new Date(u.created_at).toLocaleDateString()}
                       </p>
@@ -172,18 +220,40 @@ export default function AdminPage() {
                     </span>
 
                     {u.id !== user?.id && (
-                      <button
-                        onClick={() => handleDelete(u.id, u.username)}
-                        disabled={deleting === u.id}
-                        className="p-2 rounded-xl text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all disabled:opacity-50"
-                        title="Delete user"
-                      >
-                        {deleting === u.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="w-4 h-4" />
+                      <div className="flex items-center gap-1">
+                        {!u.is_approved && (
+                          <>
+                            <button
+                              onClick={() => handleAction(u.id, "approve")}
+                              disabled={acting === u.id}
+                              className="px-3 py-1.5 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-all disabled:opacity-50"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => handleAction(u.id, "reject")}
+                              disabled={acting === u.id}
+                              className="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition-all disabled:opacity-50"
+                            >
+                              Reject
+                            </button>
+                          </>
                         )}
-                      </button>
+                        {u.is_approved && (
+                          <button
+                            onClick={() => handleDelete(u.id, u.username)}
+                            disabled={deleting === u.id}
+                            className="p-2 rounded-xl text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all disabled:opacity-50"
+                            title="Delete user"
+                          >
+                            {deleting === u.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

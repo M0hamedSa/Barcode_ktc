@@ -32,6 +32,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // Check approval
+    if (!user.is_approved) {
+      return NextResponse.json(
+        {
+          error:
+            "Your account is pending admin approval. Please wait for an administrator to approve your access.",
+        },
+        { status: 403 },
+      );
+    }
+
     // Create session
     await createSession(user.id, user.username, user.role);
 
