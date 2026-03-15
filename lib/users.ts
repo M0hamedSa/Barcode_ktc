@@ -93,10 +93,18 @@ export async function findUserByResetToken(
   const result = await pool
     .request()
     .input("token", sql.NVarChar(255), token)
-    .query(
-      "SELECT * FROM users_barcode WHERE reset_token = @token AND reset_token_expires > GETDATE()",
-    );
-  return result.recordset[0] || null;
+    .query("SELECT * FROM users_barcode WHERE reset_token = @token");
+
+  const user = (result.recordset[0] as DbUser) || null;
+
+  if (user && user.reset_token_expires) {
+    const expires = new Date(user.reset_token_expires);
+    if (expires < new Date()) {
+      return null;
+    }
+  }
+
+  return user;
 }
 
 export async function createUser(
