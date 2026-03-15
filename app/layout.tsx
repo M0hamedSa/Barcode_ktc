@@ -4,6 +4,8 @@ import "./globals.css";
 import ZxingScript from "@/components/ZxingScript";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/components/AuthProvider";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 // import { ZxingLoader } from "@/components/ZxingLoader";
 
 const geistSans = Geist({
@@ -79,6 +81,8 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>{children}</AuthProvider>
           <ZxingScript />
+          <Analytics />
+          <SpeedInsights />
         </ThemeProvider>
       </body>
     </html>
