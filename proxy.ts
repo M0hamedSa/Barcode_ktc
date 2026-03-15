@@ -16,7 +16,7 @@ const ADMIN_ROUTES = ["/admin"];
 // Routes that require supervisor (or admin) role
 const SUPERVISOR_ROUTES = ["/def"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow public API routes
