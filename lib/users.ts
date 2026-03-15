@@ -36,8 +36,13 @@ async function getAuthPool(): Promise<sql.ConnectionPool> {
 export interface DbUser {
   id: number;
   username: string;
+  email: string | null;
   password_hash: string;
   role: string;
+  is_verified: boolean;
+  verification_token: string | null;
+  reset_token: string | null;
+  reset_token_expires: Date | null;
   created_at: Date;
 }
 
@@ -52,6 +57,15 @@ export async function findUserByUsername(
   return result.recordset[0] || null;
 }
 
+export async function findUserByEmail(email: string): Promise<DbUser | null> {
+  const pool = await getAuthPool();
+  const result = await pool
+    .request()
+    .input("email", sql.NVarChar(255), email)
+    .query("SELECT * FROM users_barcode WHERE email = @email");
+  return result.recordset[0] || null;
+}
+
 export async function findUserById(id: number): Promise<DbUser | null> {
   const pool = await getAuthPool();
   const result = await pool
@@ -61,23 +75,94 @@ export async function findUserById(id: number): Promise<DbUser | null> {
   return result.recordset[0] || null;
 }
 
+export async function findUserByVerificationToken(
+  token: string,
+): Promise<DbUser | null> {
+  const pool = await getAuthPool();
+  const result = await pool
+    .request()
+    .input("token", sql.NVarChar(255), token)
+    .query("SELECT * FROM users_barcode WHERE verification_token = @token");
+  return result.recordset[0] || null;
+}
+
+export async function findUserByResetToken(
+  token: string,
+): Promise<DbUser | null> {
+  const pool = await getAuthPool();
+  const result = await pool
+    .request()
+    .input("token", sql.NVarChar(255), token)
+    .query(
+      "SELECT * FROM users_barcode WHERE reset_token = @token AND reset_token_expires > GETDATE()",
+    );
+  return result.recordset[0] || null;
+}
+
 export async function createUser(
   username: string,
+  email: string,
   passwordHash: string,
+  verificationToken: string,
   role: string = "user",
 ): Promise<DbUser> {
   const pool = await getAuthPool();
   const result = await pool
     .request()
     .input("username", sql.NVarChar(100), username)
+    .input("email", sql.NVarChar(255), email)
     .input("passwordHash", sql.NVarChar(255), passwordHash)
     .input("role", sql.NVarChar(20), role)
+    .input("verificationToken", sql.NVarChar(255), verificationToken)
     .query(
-      `INSERT INTO users_barcode (username, password_hash, role)
+      `INSERT INTO users_barcode (username, email, password_hash, role, verification_token)
        OUTPUT INSERTED.*
-       VALUES (@username, @passwordHash, @role)`,
+       VALUES (@username, @email, @passwordHash, @role, @verificationToken)`,
     );
   return result.recordset[0];
+}
+
+export async function verifyUserEmail(userId: number): Promise<boolean> {
+  const pool = await getAuthPool();
+  const result = await pool
+    .request()
+    .input("userId", sql.Int, userId)
+    .query(
+      "UPDATE users_barcode SET is_verified = 1, verification_token = NULL WHERE id = @userId",
+    );
+  return (result.rowsAffected?.[0] ?? 0) > 0;
+}
+
+export async function setResetToken(
+  email: string,
+  token: string,
+  expires: Date,
+): Promise<boolean> {
+  const pool = await getAuthPool();
+  const result = await pool
+    .request()
+    .input("email", sql.NVarChar(255), email)
+    .input("token", sql.NVarChar(255), token)
+    .input("expires", sql.DateTime2, expires)
+    .query(
+      "UPDATE users_barcode SET reset_token = @token, reset_token_expires = @expires WHERE email = @email",
+    );
+  return (result.rowsAffected?.[0] ?? 0) > 0;
+}
+
+export async function resetPassword(
+  userId: number,
+  newPasswordHash: string,
+): Promise<boolean> {
+  const pool = await getAuthPool();
+  const result = await pool
+    .request()
+    .input("userId", sql.Int, userId)
+    .input("passwordHash", sql.NVarChar(255), newPasswordHash)
+    .query(
+      "UPDATE users_barcode SET password_hash = @passwordHash, reset_token = NULL, reset_token_expires = NULL WHERE id = @userId",
+    );
+  return (result.rowsAffected?.[0] ?? 0) > 0;
 }
 
 export async function listUsers(): Promise<Omit<DbUser, "password_hash">[]> {
@@ -85,7 +170,7 @@ export async function listUsers(): Promise<Omit<DbUser, "password_hash">[]> {
   const result = await pool
     .request()
     .query(
-      "SELECT id, username, role, created_at FROM users_barcode ORDER BY created_at DESC",
+      "SELECT id, username, email, role, is_verified, created_at FROM users_barcode ORDER BY created_at DESC",
     );
   return result.recordset;
 }

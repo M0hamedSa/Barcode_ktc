@@ -130,6 +130,14 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
+            <div className="mt-2 text-right">
+              <Link
+                href="/forgot-password"
+                className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
           </div>
 
           <button

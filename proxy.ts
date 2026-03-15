@@ -7,8 +7,20 @@ const SECRET = new TextEncoder().encode(
 const COOKIE_NAME = "ktc_session";
 
 // Routes that don't require authentication
-const PUBLIC_ROUTES = ["/login", "/register"];
-const PUBLIC_API_ROUTES = ["/api/auth/login", "/api/auth/register"];
+const PUBLIC_ROUTES = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-status",
+];
+const PUBLIC_API_ROUTES = [
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/verify",
+  "/api/auth/forgot-password",
+  "/api/auth/reset-password",
+];
 
 // Routes that require admin role
 const ADMIN_ROUTES = ["/admin"];
