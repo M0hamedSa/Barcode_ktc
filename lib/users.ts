@@ -115,6 +115,8 @@ export async function createUser(
   verificationToken: string,
   role: string = "user",
 ): Promise<DbUser> {
+  const isApproved = role === "admin" ? 1 : 0;
+
   const pool = await getAuthPool();
   const result = await pool
     .request()
@@ -123,10 +125,11 @@ export async function createUser(
     .input("passwordHash", sql.NVarChar(255), passwordHash)
     .input("role", sql.NVarChar(20), role)
     .input("verificationToken", sql.NVarChar(255), verificationToken)
+    .input("isApproved", sql.Bit, isApproved)
     .query(
       `INSERT INTO users_barcode (username, email, password_hash, role, verification_token, is_approved)
        OUTPUT INSERTED.*
-       VALUES (@username, @email, @passwordHash, @role, @verificationToken, 0)`,
+       VALUES (@username, @email, @passwordHash, @role, @verificationToken, @isApproved)`,
     );
   return result.recordset[0];
 }

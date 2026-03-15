@@ -32,8 +32,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check approval
-    if (!user.is_approved) {
+    // Check approval (admins are exempt)
+    if (!user.is_approved && user.role !== "admin") {
       return NextResponse.json(
         {
           error:
