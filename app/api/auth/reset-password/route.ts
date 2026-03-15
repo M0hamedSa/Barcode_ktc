@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { findUserByResetToken, resetPassword } from "@/lib/users";
-import { hashPassword } from "@/lib/auth";
+import { hashPassword, verifyPassword } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -26,6 +26,15 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: "Invalid or expired reset token" },
+        { status: 400 },
+      );
+    }
+
+    // Check if new password is the same as current password
+    const isSamePassword = await verifyPassword(password, user.password_hash);
+    if (isSamePassword) {
+      return NextResponse.json(
+        { error: "New password cannot be the same as your current password" },
         { status: 400 },
       );
     }
